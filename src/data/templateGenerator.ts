@@ -5,7 +5,7 @@ export type SleepSetup = 'tent' | 'car' | 'car-tent' | 'van';
 export type EatingSetup = 'stove' | 'campfire' | 'bbq' | 'cold-food' | 'freeze-dried' | 'restaurants';
 export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
 export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table';
-export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling';
+export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling' | 'trail-running' | 'photography' | 'yoga' | 'stargazing' | 'surfing';
 export type Duration = 'day' | 'short' | 'medium' | 'long';
 export type Season = 'summer' | 'shoulder' | 'winter';
 
@@ -59,6 +59,8 @@ export function generateTemplateName(answers: CreatorAnswers): string {
   const activityLabel: Record<Activity, string> = {
     hiking: 'hiking', swimming: 'swimming', cycling: 'cycling',
     climbing: 'climbing', fishing: 'fishing', paddling: 'paddling',
+    'trail-running': 'trail running', photography: 'photography',
+    yoga: 'yoga', stargazing: 'stargazing', surfing: 'surfing',
   };
 
   const activityStr = activities.length > 0
@@ -280,6 +282,34 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Dry bag', category: 'other', quantity: ppl });
     raw.push({ name: 'Water shoes', category: 'clothing', quantity: ppl });
     if (isCold) raw.push({ name: 'Paddling jacket', category: 'clothing', quantity: adults });
+  }
+  if (activities.includes('trail-running')) {
+    raw.push({ name: 'Trail running shoes', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Hydration vest', category: 'tools', quantity: adults });
+    if (!isWinter) raw.push({ name: 'Running gaiters', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Blister pads', category: 'first-aid', quantity: 1 });
+  }
+  if (activities.includes('photography')) {
+    raw.push({ name: 'Camera', category: 'tools', quantity: 1 });
+    raw.push({ name: 'Camera bag / case', category: 'tools', quantity: 1 });
+    raw.push({ name: 'Extra batteries / charger', category: 'tools', quantity: 1 });
+    raw.push({ name: 'Memory cards', category: 'tools', quantity: 2 });
+    raw.push({ name: 'Tripod', category: 'tools', quantity: 1 });
+  }
+  if (activities.includes('yoga')) {
+    raw.push({ name: 'Yoga mat', category: 'other', quantity: adults });
+  }
+  if (activities.includes('stargazing')) {
+    raw.push({ name: 'Red-light headlamp', category: 'tools', quantity: adults });
+    raw.push({ name: 'Star map / app', category: 'other', quantity: 1 });
+    if (isCold) raw.push({ name: 'Warm blanket', category: 'sleeping', quantity: adults });
+  }
+  if (activities.includes('surfing')) {
+    raw.push({ name: 'Wetsuit', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Rashguard', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Surf wax', category: 'other', quantity: 1 });
+    raw.push({ name: 'Dry bag', category: 'other', quantity: 1 });
+    raw.push({ name: 'Quick-dry towel', category: 'other', quantity: adults });
   }
 
   // ── KIDS EXTRAS ──────────────────────────────────────────────────

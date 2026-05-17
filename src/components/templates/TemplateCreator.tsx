@@ -60,6 +60,11 @@ const ACTIVITY_OPTIONS: Option<Activity>[] = [
   { value: 'climbing', emoji: '🧗', label: 'Climbing', description: 'Rock or sport climbing' },
   { value: 'fishing', emoji: '🎣', label: 'Fishing', description: 'Angling or fly fishing' },
   { value: 'paddling', emoji: '🛶', label: 'Paddling', description: 'Kayak, canoe or SUP' },
+  { value: 'trail-running', emoji: '🏃', label: 'Trail running', description: 'Off-road running' },
+  { value: 'photography', emoji: '📷', label: 'Photography', description: 'Camera gear and tripod' },
+  { value: 'yoga', emoji: '🧘', label: 'Yoga', description: 'Mat and mindful movement' },
+  { value: 'stargazing', emoji: '🔭', label: 'Stargazing', description: 'Night sky observation' },
+  { value: 'surfing', emoji: '🏄', label: 'Surfing', description: 'Waves and watersports' },
 ];
 
 const DURATION_OPTIONS: Option<Duration>[] = [
