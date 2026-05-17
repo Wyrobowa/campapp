@@ -3,6 +3,7 @@ import type {
   CreatorAnswers, SleepSetup, EatingSetup, FuelSource, VehicleEquipment,
   Activity, Duration, GroupComposition, Season, GeneratedItem,
 } from '../../data/templateGenerator';
+
 import { generateItems, generateTemplateName } from '../../data/templateGenerator';
 import { CATEGORIES } from '../../data/categories';
 import { Button } from '../ui/Button';
@@ -30,10 +31,12 @@ const SLEEP_OPTIONS: Option<SleepSetup>[] = [
 ];
 
 const EAT_OPTIONS: Option<EatingSetup>[] = [
-  { value: 'cook-all', emoji: '🍳', label: 'Cook all meals', description: 'Full camp kitchen setup' },
-  { value: 'mix', emoji: '🔀', label: 'Mix', description: 'Some cooking, some eating out' },
-  { value: 'restaurants', emoji: '🍽️', label: 'Mostly restaurants', description: 'Eating out every day' },
-  { value: 'cold-food', emoji: '🥗', label: 'Cold food only', description: 'No cooking, just snacks & prep' },
+  { value: 'stove', emoji: '🍳', label: 'Camp stove', description: 'Hot meals on a portable stove' },
+  { value: 'campfire', emoji: '🔥', label: 'Campfire cooking', description: 'Cooking over an open fire' },
+  { value: 'bbq', emoji: '🥩', label: 'BBQ / grilling', description: 'Charcoal or portable grill' },
+  { value: 'cold-food', emoji: '🥗', label: 'Cold food & snacks', description: 'No cooking needed' },
+  { value: 'freeze-dried', emoji: '🧂', label: 'Freeze-dried meals', description: 'Just add boiling water' },
+  { value: 'restaurants', emoji: '🍽️', label: 'Restaurants & cafés', description: 'Mostly eating out' },
 ];
 
 const VEHICLE_OPTIONS: Option<VehicleEquipment>[] = [
@@ -84,7 +87,7 @@ interface QuestionDef {
 }
 
 const SLEEP_Q: QuestionDef = { key: 'sleepSetup', heading: 'Where will you sleep?', subheading: 'Your main sleeping setup for this trip.', multiSelect: false, options: SLEEP_OPTIONS, cols: 2 };
-const EAT_Q: QuestionDef = { key: 'eatingSetup', heading: 'How will you eat?', subheading: "This shapes what cooking gear you'll need.", multiSelect: false, options: EAT_OPTIONS, cols: 2 };
+const EAT_Q: QuestionDef = { key: 'eatingSetup', heading: 'How will you eat?', subheading: 'Select all that apply.', multiSelect: true, options: EAT_OPTIONS, cols: 2 };
 const VEHICLE_Q: QuestionDef = { key: 'vehicleEquipment', heading: "What's already in your vehicle?", subheading: "Select what you've already got packed — those items won't appear on your list.", multiSelect: true, options: VEHICLE_OPTIONS, cols: 2 };
 const FUEL_Q: QuestionDef = { key: 'fuelSource', heading: 'What will you cook on?', subheading: 'Determines which stove and fuel to add to your list.', multiSelect: false, options: FUEL_OPTIONS, cols: 2 };
 const ACTIVITIES_Q: QuestionDef = { key: 'activities', heading: 'Any planned activities?', subheading: 'Select all that apply. Skip if none.', multiSelect: true, options: ACTIVITY_OPTIONS, cols: 2 };
@@ -94,12 +97,13 @@ const SEASON_Q: QuestionDef = { key: 'season', heading: 'What season?', subheadi
 
 // ── TYPES ────────────────────────────────────────────────────────
 
-type MultiKey = 'activities' | 'vehicleEquipment';
+type MultiKey = 'activities' | 'vehicleEquipment' | 'eatingSetup';
 type SingleKey = Exclude<keyof CreatorAnswers, MultiKey | 'group'>;
 
 type PartialAnswers = Omit<Partial<CreatorAnswers>, MultiKey | 'group'> & {
   activities: Activity[];
   vehicleEquipment: VehicleEquipment[];
+  eatingSetup: EatingSetup[];
   group: GroupComposition;
 };
 
@@ -107,12 +111,12 @@ type PartialAnswers = Omit<Partial<CreatorAnswers>, MultiKey | 'group'> & {
 
 function computeQuestions(answers: PartialAnswers): QuestionDef[] {
   const isVehicleSleep = answers.sleepSetup === 'car' || answers.sleepSetup === 'van' || answers.sleepSetup === 'car-tent';
-  const isCooking = answers.eatingSetup === 'cook-all' || answers.eatingSetup === 'mix';
-  const vHasStove = answers.vehicleEquipment.includes('stove');
+  const needsFuel = (answers.eatingSetup.includes('stove') || answers.eatingSetup.includes('freeze-dried'))
+    && !answers.vehicleEquipment.includes('stove');
 
   const qs: QuestionDef[] = [SLEEP_Q, EAT_Q];
   if (isVehicleSleep) qs.push(VEHICLE_Q);
-  if (isCooking && !vHasStove) qs.push(FUEL_Q);
+  if (needsFuel) qs.push(FUEL_Q);
   qs.push(ACTIVITIES_Q, DURATION_Q, GROUP_Q, SEASON_Q);
   return qs;
 }
@@ -165,6 +169,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
   const [answers, setAnswers] = useState<PartialAnswers>({
     activities: [],
     vehicleEquipment: [],
+    eatingSetup: [],
     group: { adults: 1, kids: 0, pets: 0 },
   });
   const [templateName, setTemplateName] = useState('');
@@ -345,7 +350,9 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
             ? `Continue — ${answers.group.adults + answers.group.kids} ${answers.group.adults + answers.group.kids === 1 ? 'person' : 'people'}${answers.group.pets > 0 ? ` + ${answers.group.pets} pet${answers.group.pets > 1 ? 's' : ''}` : ''}`
             : question.key === 'vehicleEquipment'
               ? selectedMulti.length === 0 ? 'Nothing pre-packed — continue' : `Continue (${selectedMulti.length} already packed)`
-              : selectedMulti.length === 0 ? 'Skip — no specific activities' : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
+              : question.key === 'eatingSetup'
+                ? selectedMulti.length === 0 ? 'Continue — eating out only' : `Continue (${selectedMulti.length} meal type${selectedMulti.length === 1 ? '' : 's'})`
+                : selectedMulti.length === 0 ? 'Skip — no specific activities' : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
         </Button>
       )}
     </div>

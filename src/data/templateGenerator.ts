@@ -2,7 +2,7 @@ import type { GearCategory } from '../types';
 import { generateId } from '../utils/id';
 
 export type SleepSetup = 'tent' | 'car' | 'car-tent' | 'van';
-export type EatingSetup = 'cook-all' | 'mix' | 'restaurants' | 'cold-food';
+export type EatingSetup = 'stove' | 'campfire' | 'bbq' | 'cold-food' | 'freeze-dried' | 'restaurants';
 export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
 export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table';
 export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling';
@@ -17,7 +17,7 @@ export interface GroupComposition {
 
 export interface CreatorAnswers {
   sleepSetup: SleepSetup;
-  eatingSetup: EatingSetup;
+  eatingSetup: EatingSetup[];
   fuelSource?: FuelSource;
   vehicleEquipment: VehicleEquipment[];
   activities: Activity[];
@@ -99,7 +99,15 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   const vHasStove = vehicleEquipment.includes('stove');
   const vHasInverter = vehicleEquipment.includes('inverter');
   const vHasChairsTable = vehicleEquipment.includes('chairs-table');
-  const isCooking = eatingSetup === 'cook-all' || eatingSetup === 'mix';
+
+  const eating = eatingSetup;
+  const hasStoveCooking = eating.includes('stove');
+  const hasCampfire = eating.includes('campfire');
+  const hasBBQ = eating.includes('bbq');
+  const hasColdFood = eating.includes('cold-food');
+  const hasFreezeDried = eating.includes('freeze-dried');
+  const hasRealCooking = hasStoveCooking || hasCampfire || hasBBQ;
+  const needsHotWater = hasStoveCooking || hasFreezeDried;
 
   const raw: Omit<GeneratedItem, 'id'>[] = [];
 
@@ -135,48 +143,61 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   }
 
   // ── COOKING ──────────────────────────────────────────────────────
-  if (isCooking) {
-    if (!vHasStove) {
-      const fuel = fuelSource ?? 'gas';
-      if (fuel === 'gas') {
-        raw.push({ name: isWinter ? 'Cold-weather gas stove' : 'Gas stove', category: 'cooking', quantity: 1 });
-        raw.push({ name: isWinter ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: isVeryLong ? 3 : isLong ? 2 : 1 });
-      } else if (fuel === 'alcohol') {
-        raw.push({ name: 'Alcohol stove', category: 'cooking', quantity: 1 });
-        raw.push({ name: 'Alcohol fuel bottle', category: 'cooking', quantity: isLong ? 2 : 1 });
-      } else if (fuel === 'campfire') {
-        raw.push({ name: 'Grill grate / tripod', category: 'cooking', quantity: 1 });
-        raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 });
-        raw.push({ name: 'Fire starter', category: 'cooking', quantity: 1 });
-      } else if (fuel === 'electric') {
-        raw.push({ name: 'Portable induction cooktop', category: 'cooking', quantity: 1 });
-        if (!vHasInverter) raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
-      }
-    }
 
-    if (eatingSetup === 'cook-all') {
-      raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
-      raw.push({ name: 'Pan', category: 'cooking', quantity: 1 });
-      raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
-      raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
-      raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
-      if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: adults });
-    } else {
-      raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
-      raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
-      raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
-      if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: adults });
+  // STOVE / FUEL (for camp stove cooking or freeze-dried)
+  if (needsHotWater && !vHasStove) {
+    const fuel = fuelSource ?? 'gas';
+    if (fuel === 'gas') {
+      raw.push({ name: isWinter ? 'Cold-weather gas stove' : 'Gas stove', category: 'cooking', quantity: 1 });
+      raw.push({ name: isWinter ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: isVeryLong ? 3 : isLong ? 2 : 1 });
+    } else if (fuel === 'alcohol') {
+      raw.push({ name: 'Alcohol stove', category: 'cooking', quantity: 1 });
+      raw.push({ name: 'Alcohol fuel bottle', category: 'cooking', quantity: isLong ? 2 : 1 });
+    } else if (fuel === 'electric') {
+      raw.push({ name: 'Portable induction cooktop', category: 'cooking', quantity: 1 });
+      if (!vHasInverter) raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
     }
-  } else if (eatingSetup === 'cold-food') {
+  }
+
+  // CAMPFIRE GEAR
+  if (hasCampfire) {
+    raw.push({ name: 'Grill grate / tripod', category: 'cooking', quantity: 1 });
+    raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 });
+    raw.push({ name: 'Fire starter', category: 'cooking', quantity: 1 });
+  }
+
+  // BBQ GEAR
+  if (hasBBQ) {
+    raw.push({ name: 'Portable BBQ / grill', category: 'cooking', quantity: 1 });
+    raw.push({ name: 'Charcoal / briquettes', category: 'cooking', quantity: isLong ? 3 : 1 });
+    raw.push({ name: 'BBQ tongs', category: 'cooking', quantity: 1 });
+    raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 }); // deduped if also campfire
+  }
+
+  // COLD FOOD EXTRAS
+  if (hasColdFood) {
     if (!vHasFridge) raw.push({ name: 'Camping cooler', category: 'cooking', quantity: 1 });
+    raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
+  }
+
+  // COOKING VESSELS & UTENSILS
+  if (hasRealCooking) {
+    raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
+    if (hasStoveCooking || hasBBQ) raw.push({ name: 'Pan', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
     raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
-    raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
-    raw.push({ name: 'Reusable water bottle', category: 'cooking', quantity: ppl });
-  } else {
-    raw.push({ name: 'Reusable water bottle', category: 'cooking', quantity: ppl });
-    raw.push({ name: 'Snack box', category: 'cooking', quantity: ppl });
+    raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
+    if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: adults });
+  } else if (hasFreezeDried) {
+    raw.push({ name: 'Mug / bowl', category: 'cooking', quantity: ppl });
+    raw.push({ name: 'Spork', category: 'cooking', quantity: ppl });
+  } else if (hasColdFood) {
+    raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
+    raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
   }
+
+  // WATER BOTTLE (always)
+  raw.push({ name: 'Reusable water bottle', category: 'cooking', quantity: ppl });
 
   // ── CLOTHING ─────────────────────────────────────────────────────
   if (isWinter) {
@@ -286,7 +307,6 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Chemical hand warmers', category: 'other', quantity: ppl * 2 });
   }
 
-  // Deduplicate by name
   const seen = new Set<string>();
   return raw
     .filter((item) => {
