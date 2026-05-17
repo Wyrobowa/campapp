@@ -7,8 +7,13 @@ export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
 export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table';
 export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling';
 export type Duration = 'day' | 'short' | 'medium' | 'long';
-export type GroupSize = 'solo' | 'duo' | 'family' | 'with-pet' | 'group' | 'large-group';
 export type Season = 'summer' | 'shoulder' | 'winter';
+
+export interface GroupComposition {
+  adults: number;
+  kids: number;
+  pets: number;
+}
 
 export interface CreatorAnswers {
   sleepSetup: SleepSetup;
@@ -17,7 +22,7 @@ export interface CreatorAnswers {
   vehicleEquipment: VehicleEquipment[];
   activities: Activity[];
   duration: Duration;
-  groupSize: GroupSize;
+  group: GroupComposition;
   season: Season;
 }
 
@@ -28,14 +33,22 @@ export interface GeneratedItem {
   quantity: number;
 }
 
+function formatGroupStr(group: GroupComposition): string {
+  const parts: string[] = [];
+  if (group.adults === 1) parts.push('solo');
+  else parts.push(`${group.adults} adults`);
+  if (group.kids === 1) parts.push('1 kid');
+  else if (group.kids > 1) parts.push(`${group.kids} kids`);
+  if (group.pets === 1) parts.push('+ dog');
+  else if (group.pets > 1) parts.push(`+ ${group.pets} pets`);
+  return parts.join(', ');
+}
+
 export function generateTemplateName(answers: CreatorAnswers): string {
-  const { sleepSetup, duration, season, activities, groupSize } = answers;
+  const { sleepSetup, duration, season, activities, group } = answers;
 
   const sleepLabel: Record<SleepSetup, string> = {
-    tent: 'tent camping',
-    car: 'car camping',
-    'car-tent': 'car tent camping',
-    van: 'van trip',
+    tent: 'tent camping', car: 'car camping', 'car-tent': 'car tent camping', van: 'van trip',
   };
   const durationLabel: Record<Duration, string> = {
     day: 'Day trip', short: '1–2 night', medium: '3–5 night', long: 'Week-long',
@@ -47,39 +60,38 @@ export function generateTemplateName(answers: CreatorAnswers): string {
     hiking: 'hiking', swimming: 'swimming', cycling: 'cycling',
     climbing: 'climbing', fishing: 'fishing', paddling: 'paddling',
   };
-  const groupSuffix: Partial<Record<GroupSize, string>> = {
-    family: ' — family', 'with-pet': ' — with pet', 'large-group': ' — large group',
-  };
 
   const activityStr = activities.length > 0
     ? ` + ${activities.slice(0, 2).map((a) => activityLabel[a]).join(' & ')}`
     : '';
-  const suffix = groupSuffix[groupSize] ?? '';
+  const groupStr = formatGroupStr(group);
+  const groupSuffix = groupStr !== 'solo' ? ` (${groupStr})` : '';
 
   if (duration === 'day') {
     return activities.length > 0
-      ? `Day trip — ${activities.slice(0, 2).map((a) => activityLabel[a]).join(' & ')}${suffix}`
-      : `Day trip${suffix}`;
+      ? `Day trip — ${activities.slice(0, 2).map((a) => activityLabel[a]).join(' & ')}${groupSuffix}`
+      : `Day trip${groupSuffix}`;
   }
 
-  return `${durationLabel[duration]} ${seasonLabel[season]} ${sleepLabel[sleepSetup]}${activityStr}${suffix}`;
+  return `${durationLabel[duration]} ${seasonLabel[season]} ${sleepLabel[sleepSetup]}${activityStr}${groupSuffix}`;
 }
 
 export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
-  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, groupSize, season } = answers;
+  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, group, season } = answers;
+
+  const adults = group.adults;
+  const kids = group.kids;
+  const pets = group.pets;
+  const ppl = adults + kids;
+  const hasKids = kids > 0;
+  const hasPet = pets > 0;
 
   const overnight = duration !== 'day';
   const isWinter = season === 'winter';
   const isCold = season !== 'summer';
   const isLong = duration === 'medium' || duration === 'long';
   const isVeryLong = duration === 'long';
-
-  const pplMap: Record<GroupSize, number> = {
-    solo: 1, duo: 2, family: 4, 'with-pet': 2, group: 4, 'large-group': 8,
-  };
-  const ppl = pplMap[groupSize];
-  const hasKids = groupSize === 'family';
-  const hasPet = groupSize === 'with-pet';
+  const isLargeGroup = ppl >= 6;
   const socks = isVeryLong ? 7 : isLong ? 4 : 3;
 
   const isVehicleSleep = sleepSetup === 'car' || sleepSetup === 'van' || sleepSetup === 'car-tent';
@@ -96,25 +108,29 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     if (sleepSetup === 'tent') {
       raw.push({ name: isWinter ? '4-season tent' : 'Tent', category: 'shelter', quantity: 1 });
       raw.push({ name: 'Tent pegs', category: 'shelter', quantity: 6 });
-      raw.push({ name: isWinter ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: ppl });
-      raw.push({ name: isWinter ? 'Insulating mat' : 'Self-inflating sleeping mat', category: 'sleeping', quantity: ppl });
-      if (!isWinter) raw.push({ name: 'Pillow', category: 'sleeping', quantity: ppl });
+      raw.push({ name: isWinter ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: isWinter ? 'Insulating mat' : 'Self-inflating sleeping mat', category: 'sleeping', quantity: adults });
+      if (!isWinter) raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
     } else if (sleepSetup === 'car') {
-      raw.push({ name: 'Sleeping bag', category: 'sleeping', quantity: ppl });
-      raw.push({ name: 'Blanket', category: 'sleeping', quantity: ppl });
-      raw.push({ name: 'Pillow', category: 'sleeping', quantity: ppl });
+      raw.push({ name: 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: 'Blanket', category: 'sleeping', quantity: adults });
+      raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Window sun shades', category: 'sleeping', quantity: 1 });
     } else if (sleepSetup === 'car-tent') {
       raw.push({ name: 'Car / roof tent', category: 'shelter', quantity: 1 });
-      raw.push({ name: isWinter ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: ppl });
-      raw.push({ name: 'Sleeping mat', category: 'sleeping', quantity: ppl });
+      raw.push({ name: isWinter ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: 'Sleeping mat', category: 'sleeping', quantity: adults });
     } else if (sleepSetup === 'van') {
-      raw.push({ name: isWinter ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: ppl });
-      raw.push({ name: 'Pillow', category: 'sleeping', quantity: ppl });
-      if (!isWinter) raw.push({ name: 'Lightweight blanket', category: 'sleeping', quantity: ppl });
+      raw.push({ name: isWinter ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
+      if (!isWinter) raw.push({ name: 'Lightweight blanket', category: 'sleeping', quantity: adults });
     }
     if (isWinter && sleepSetup !== 'car') {
-      raw.push({ name: 'Mat underlay', category: 'sleeping', quantity: ppl });
+      raw.push({ name: 'Mat underlay', category: 'sleeping', quantity: adults });
+    }
+    if (hasKids) {
+      raw.push({ name: isWinter ? "Kids' winter sleeping bag" : "Kids' sleeping bag", category: 'sleeping', quantity: kids });
+      raw.push({ name: "Kids' sleeping mat", category: 'sleeping', quantity: kids });
     }
   }
 
@@ -134,9 +150,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
         raw.push({ name: 'Fire starter', category: 'cooking', quantity: 1 });
       } else if (fuel === 'electric') {
         raw.push({ name: 'Portable induction cooktop', category: 'cooking', quantity: 1 });
-        if (!vHasInverter) {
-          raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
-        }
+        if (!vHasInverter) raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
       }
     }
 
@@ -146,12 +160,12 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
       raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
       raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
       raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
-      if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: ppl });
+      if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: adults });
     } else {
       raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
       raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
       raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
-      if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: ppl });
+      if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: adults });
     }
   } else if (eatingSetup === 'cold-food') {
     if (!vHasFridge) raw.push({ name: 'Camping cooler', category: 'cooking', quantity: 1 });
@@ -166,16 +180,26 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
 
   // ── CLOTHING ─────────────────────────────────────────────────────
   if (isWinter) {
-    raw.push({ name: 'Down jacket', category: 'clothing', quantity: ppl });
-    raw.push({ name: 'Ski pants', category: 'clothing', quantity: ppl });
-    raw.push({ name: 'Gloves', category: 'clothing', quantity: ppl });
-    raw.push({ name: 'Balaclava', category: 'clothing', quantity: ppl });
-    raw.push({ name: 'Thermal base layer', category: 'clothing', quantity: ppl });
-    raw.push({ name: 'Wool socks', category: 'clothing', quantity: ppl * socks });
+    raw.push({ name: 'Down jacket', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Ski pants', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Gloves', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Balaclava', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Thermal base layer', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Wool socks', category: 'clothing', quantity: adults * socks });
+    if (hasKids) {
+      raw.push({ name: "Kids' down jacket", category: 'clothing', quantity: kids });
+      raw.push({ name: "Kids' thermal layer", category: 'clothing', quantity: kids });
+      raw.push({ name: "Kids' gloves", category: 'clothing', quantity: kids });
+      raw.push({ name: "Kids' wool socks", category: 'clothing', quantity: kids * socks });
+    }
   } else {
-    raw.push({ name: 'Rain jacket', category: 'clothing', quantity: ppl });
-    if (isCold) raw.push({ name: 'Fleece', category: 'clothing', quantity: ppl });
-    raw.push({ name: 'Socks', category: 'clothing', quantity: ppl * socks });
+    raw.push({ name: 'Rain jacket', category: 'clothing', quantity: adults });
+    if (isCold) raw.push({ name: 'Fleece', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Socks', category: 'clothing', quantity: adults * socks });
+    if (hasKids) {
+      raw.push({ name: "Kids' rain jacket", category: 'clothing', quantity: kids });
+      raw.push({ name: "Kids' socks", category: 'clothing', quantity: kids * socks });
+    }
   }
 
   // ── TOOLS ────────────────────────────────────────────────────────
@@ -183,32 +207,27 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   if (overnight) raw.push({ name: 'Pocket knife', category: 'tools', quantity: 1 });
 
   const usingElectric = fuelSource === 'electric';
-  const needsPowerBank = (isLong || sleepSetup === 'van') && !vHasInverter && !usingElectric;
-  if (needsPowerBank) {
-    raw.push({ name: 'Power bank', category: 'tools', quantity: groupSize === 'large-group' ? 2 : 1 });
+  if ((isLong || sleepSetup === 'van') && !vHasInverter && !usingElectric) {
+    raw.push({ name: 'Power bank', category: 'tools', quantity: isLargeGroup ? 2 : 1 });
   }
-
-  if (isVehicleSleep) {
-    raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
-  }
-
+  if (isVehicleSleep) raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
   if (isWinter) {
-    raw.push({ name: 'Crampons / microspikes', category: 'tools', quantity: ppl });
+    raw.push({ name: 'Crampons / microspikes', category: 'tools', quantity: adults });
     raw.push({ name: 'Snow shovel', category: 'tools', quantity: 1 });
   }
 
-  // ── VEHICLE COMFORTS (not already packed) ────────────────────────
+  // ── VEHICLE COMFORTS ─────────────────────────────────────────────
   if (isVehicleSleep && !vHasChairsTable) {
     raw.push({ name: 'Folding table', category: 'other', quantity: 1 });
-    raw.push({ name: 'Camping chairs', category: 'other', quantity: ppl });
+    raw.push({ name: 'Camping chairs', category: 'other', quantity: adults });
   }
 
   // ── ACTIVITY GEAR ────────────────────────────────────────────────
   if (activities.includes('hiking')) {
-    raw.push({ name: 'Trekking poles', category: 'tools', quantity: ppl * 2 });
+    raw.push({ name: 'Trekking poles', category: 'tools', quantity: adults * 2 });
     raw.push({ name: 'Map + compass', category: 'tools', quantity: 1 });
-    raw.push({ name: 'Hiking boots', category: 'clothing', quantity: ppl });
-    if (isWinter) raw.push({ name: 'Gaiters', category: 'clothing', quantity: ppl });
+    raw.push({ name: 'Hiking boots', category: 'clothing', quantity: adults });
+    if (isWinter) raw.push({ name: 'Gaiters', category: 'clothing', quantity: adults });
     raw.push({ name: 'Blister pads', category: 'first-aid', quantity: 1 });
   }
   if (activities.includes('swimming')) {
@@ -222,13 +241,13 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Bike repair kit', category: 'tools', quantity: 1 });
     raw.push({ name: 'Bike pump', category: 'tools', quantity: 1 });
     raw.push({ name: 'Bike lights', category: 'tools', quantity: ppl });
-    raw.push({ name: 'Cycling gloves', category: 'clothing', quantity: ppl });
+    raw.push({ name: 'Cycling gloves', category: 'clothing', quantity: adults });
   }
   if (activities.includes('climbing')) {
-    raw.push({ name: 'Climbing harness', category: 'tools', quantity: ppl });
-    raw.push({ name: 'Climbing helmet', category: 'tools', quantity: ppl });
-    raw.push({ name: 'Chalk bag', category: 'tools', quantity: ppl });
-    raw.push({ name: 'Climbing shoes', category: 'clothing', quantity: ppl });
+    raw.push({ name: 'Climbing harness', category: 'tools', quantity: adults });
+    raw.push({ name: 'Climbing helmet', category: 'tools', quantity: adults });
+    raw.push({ name: 'Chalk bag', category: 'tools', quantity: adults });
+    raw.push({ name: 'Climbing shoes', category: 'clothing', quantity: adults });
   }
   if (activities.includes('fishing')) {
     raw.push({ name: 'Fishing rod', category: 'tools', quantity: 1 });
@@ -239,25 +258,22 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Life jacket (PFD)', category: 'tools', quantity: ppl });
     raw.push({ name: 'Dry bag', category: 'other', quantity: ppl });
     raw.push({ name: 'Water shoes', category: 'clothing', quantity: ppl });
-    if (isCold) raw.push({ name: 'Paddling jacket', category: 'clothing', quantity: ppl });
+    if (isCold) raw.push({ name: 'Paddling jacket', category: 'clothing', quantity: adults });
   }
 
-  // ── KIDS GEAR ────────────────────────────────────────────────────
+  // ── KIDS EXTRAS ──────────────────────────────────────────────────
   if (hasKids) {
-    raw.push({ name: "Kids' sleeping bag", category: 'sleeping', quantity: 2 });
-    raw.push({ name: "Kids' rain jacket", category: 'clothing', quantity: 2 });
-    raw.push({ name: "Kids' headlamp", category: 'tools', quantity: 2 });
+    raw.push({ name: "Kids' headlamp", category: 'tools', quantity: kids });
     raw.push({ name: 'Baby wipes', category: 'other', quantity: 2 });
-    if (isWinter) raw.push({ name: "Kids' thermal layer", category: 'clothing', quantity: 2 });
   }
 
   // ── PET GEAR ─────────────────────────────────────────────────────
   if (hasPet) {
-    raw.push({ name: 'Dog leash', category: 'other', quantity: 1 });
-    raw.push({ name: 'Dog food + bowl', category: 'other', quantity: 1 });
-    raw.push({ name: 'Pet water bowl', category: 'other', quantity: 1 });
-    raw.push({ name: 'Poo bags', category: 'other', quantity: 1 });
-    raw.push({ name: 'Pet towel', category: 'other', quantity: 1 });
+    raw.push({ name: 'Dog leash', category: 'other', quantity: pets });
+    raw.push({ name: 'Dog food + bowl', category: 'other', quantity: pets });
+    raw.push({ name: 'Pet water bowl', category: 'other', quantity: pets });
+    raw.push({ name: 'Poo bags', category: 'other', quantity: pets });
+    raw.push({ name: 'Pet towel', category: 'other', quantity: pets });
     raw.push({ name: 'Tick remover', category: 'first-aid', quantity: 1 });
   }
 
