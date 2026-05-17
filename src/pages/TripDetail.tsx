@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
-import type { GearCategory } from '../types';
+import type { GearCategory, Trip } from '../types';
 import { useTrips } from '../hooks/useTrips';
 import { useTemplates } from '../hooks/useTemplates';
+import { useEditableTrip } from '../hooks/useEditableTrip';
 import { CATEGORIES } from '../data/categories';
 import { CategoryGroup } from '../components/checklist/CategoryGroup';
 import { AddItemForm } from '../components/checklist/AddItemForm';
@@ -13,41 +14,15 @@ import { formatDate } from '../utils/date';
 
 const Route = getRouteApi('/trips/$tripId');
 
-export function TripDetail() {
-  const { tripId } = Route.useParams();
+function TripDetailView({ trip }: { trip: Trip }) {
   const navigate = useNavigate();
-  const { trips, toggleItem, addItem, removeItem, updateTrip } = useTrips();
+  const { toggleItem, addItem, removeItem } = useTrips();
   const { createTemplateFromTrip } = useTemplates();
+  const { editing, editName, editDate, setEditName, setEditDate, startEdit, cancelEdit, saveEdit } =
+    useEditableTrip(trip);
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editDate, setEditDate] = useState('');
   const [toast, setToast] = useState<string | null>(null);
-
-  const tripOrUndef = trips.find((t) => t.id === tripId);
-
-  useEffect(() => {
-    if (!tripOrUndef) {
-      const timer = setTimeout(() => {
-        void navigate({ to: '/' });
-      }, 1500);
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [tripOrUndef, navigate]);
-
-  if (!tripOrUndef) {
-    return (
-      <div className="min-h-screen bg-bg flex flex-col items-center justify-center gap-2 text-center p-6">
-        <p className="text-3xl">🔍</p>
-        <p className="text-sm text-gray-500">Trip not found — taking you home…</p>
-      </div>
-    );
-  }
-  // Const rebinding after the guard so closures (startEdit etc.) see Trip, not Trip | undefined
-  const trip = tripOrUndef;
 
   const packed = trip.items.filter((i) => i.packed).length;
 
@@ -66,18 +41,6 @@ export function TripDetail() {
     setTimeout(() => {
       setToast(null);
     }, 2500);
-  }
-
-  function startEdit() {
-    setEditName(trip.name);
-    setEditDate(trip.date);
-    setEditing(true);
-  }
-
-  function handleSaveEdit() {
-    if (!editName.trim()) return;
-    updateTrip(trip.id, { name: editName.trim(), date: editDate });
-    setEditing(false);
   }
 
   function handleSaveAsTemplate() {
@@ -124,15 +87,10 @@ export function TripDetail() {
             }}
           />
           <div className="flex gap-2">
-            <Button onClick={handleSaveEdit} disabled={!editName.trim()}>
+            <Button onClick={saveEdit} disabled={!editName.trim()}>
               Save
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setEditing(false);
-              }}
-            >
+            <Button variant="ghost" onClick={cancelEdit}>
               Cancel
             </Button>
           </div>
@@ -242,4 +200,34 @@ export function TripDetail() {
       )}
     </div>
   );
+}
+
+export function TripDetail() {
+  const { tripId } = Route.useParams();
+  const navigate = useNavigate();
+  const { trips } = useTrips();
+
+  const trip = trips.find((t) => t.id === tripId);
+
+  useEffect(() => {
+    if (!trip) {
+      const timer = setTimeout(() => {
+        void navigate({ to: '/' });
+      }, 1500);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [trip, navigate]);
+
+  if (!trip) {
+    return (
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center gap-2 text-center p-6">
+        <p className="text-3xl">🔍</p>
+        <p className="text-sm text-gray-500">Trip not found — taking you home…</p>
+      </div>
+    );
+  }
+
+  return <TripDetailView trip={trip} />;
 }
