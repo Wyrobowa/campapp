@@ -1,13 +1,11 @@
 import { create } from 'zustand';
-import { storageParse, storageSet } from '../utils/storage';
-import { TripArraySchema } from '../schemas';
+import { db } from '../db';
 import { generateId } from '../utils/id';
 import type { Trip, GearItem } from '../schemas';
 
-const KEY = 'camp-trips';
-
 interface TripsState {
   trips: Trip[];
+  hydrate: () => Promise<void>;
   createTrip: (
     data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>,
     items: Omit<GearItem, 'packed'>[]
@@ -19,15 +17,13 @@ interface TripsState {
   removeItem: (tripId: string, itemId: string) => void;
 }
 
-function persist(trips: Trip[]) {
-  storageSet(KEY, trips);
-  return { trips };
-}
+export const useTripsStore = create<TripsState>((set, get) => ({
+  trips: [],
 
-const initialTrips = storageParse(KEY, TripArraySchema, []);
-
-export const useTripsStore = create<TripsState>((set) => ({
-  trips: initialTrips,
+  hydrate: async () => {
+    const trips = await db.trips.orderBy('createdAt').reverse().toArray();
+    set({ trips });
+  },
 
   createTrip: (data, items) => {
     const now = new Date().toISOString();
@@ -38,71 +34,73 @@ export const useTripsStore = create<TripsState>((set) => ({
       createdAt: now,
       updatedAt: now,
     };
-    set((state) => persist([trip, ...state.trips]));
+    set((state) => ({ trips: [trip, ...state.trips] }));
+    void db.trips.put(trip);
     return trip;
   },
 
   updateTrip: (id, patch) => {
-    set((state) =>
-      persist(
-        state.trips.map((t) =>
-          t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t
-        )
-      )
-    );
+    set((state) => ({
+      trips: state.trips.map((t) =>
+        t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t
+      ),
+    }));
+    const updated = get().trips.find((t) => t.id === id);
+    if (updated) void db.trips.put(updated);
   },
 
   deleteTrip: (id) => {
-    set((state) => persist(state.trips.filter((t) => t.id !== id)));
+    set((state) => ({ trips: state.trips.filter((t) => t.id !== id) }));
+    void db.trips.delete(id);
   },
 
   toggleItem: (tripId, itemId) => {
-    set((state) =>
-      persist(
-        state.trips.map((t) =>
-          t.id === tripId
-            ? {
-                ...t,
-                updatedAt: new Date().toISOString(),
-                items: t.items.map((item) =>
-                  item.id === itemId ? { ...item, packed: !item.packed } : item
-                ),
-              }
-            : t
-        )
-      )
-    );
+    set((state) => ({
+      trips: state.trips.map((t) =>
+        t.id === tripId
+          ? {
+              ...t,
+              updatedAt: new Date().toISOString(),
+              items: t.items.map((item) =>
+                item.id === itemId ? { ...item, packed: !item.packed } : item
+              ),
+            }
+          : t
+      ),
+    }));
+    const updated = get().trips.find((t) => t.id === tripId);
+    if (updated) void db.trips.put(updated);
   },
 
   addItem: (tripId, item) => {
-    set((state) =>
-      persist(
-        state.trips.map((t) =>
-          t.id === tripId
-            ? {
-                ...t,
-                updatedAt: new Date().toISOString(),
-                items: [...t.items, { ...item, id: generateId() }],
-              }
-            : t
-        )
-      )
-    );
+    set((state) => ({
+      trips: state.trips.map((t) =>
+        t.id === tripId
+          ? {
+              ...t,
+              updatedAt: new Date().toISOString(),
+              items: [...t.items, { ...item, id: generateId() }],
+            }
+          : t
+      ),
+    }));
+    const updated = get().trips.find((t) => t.id === tripId);
+    if (updated) void db.trips.put(updated);
   },
 
   removeItem: (tripId, itemId) => {
-    set((state) =>
-      persist(
-        state.trips.map((t) =>
-          t.id === tripId
-            ? {
-                ...t,
-                updatedAt: new Date().toISOString(),
-                items: t.items.filter((item) => item.id !== itemId),
-              }
-            : t
-        )
-      )
-    );
+    set((state) => ({
+      trips: state.trips.map((t) =>
+        t.id === tripId
+          ? {
+              ...t,
+              updatedAt: new Date().toISOString(),
+              items: t.items.filter((item) => item.id !== itemId),
+            }
+          : t
+      ),
+    }));
+    const updated = get().trips.find((t) => t.id === tripId);
+    if (updated) void db.trips.put(updated);
   },
 }));
