@@ -42,12 +42,16 @@ const EAT_OPTIONS: Option<EatingSetup>[] = [
 const VEHICLE_OPTIONS: Option<VehicleEquipment>[] = [
   { value: 'fridge', emoji: '🧊', label: 'Fridge / cooler', description: 'Car fridge or portable cooler' },
   { value: 'stove', emoji: '🍳', label: 'Camp stove / kitchen', description: 'Cooking setup already packed' },
+  { value: 'cookware', emoji: '🍽️', label: 'Cookware set', description: 'Pots, pans, plates, cutlery, mugs' },
   { value: 'inverter', emoji: '⚡', label: 'Power inverter / solar', description: 'Shore power, inverter or solar' },
   { value: 'chairs-table', emoji: '🪑', label: 'Chairs & table', description: 'Camping furniture already in the car' },
   { value: 'lighting', emoji: '💡', label: 'Lighting', description: 'Lantern or string lights packed' },
   { value: 'first-aid-kit', emoji: '🩺', label: 'First aid kit', description: 'Full kit already in the car' },
+  { value: 'multi-tool', emoji: '🔧', label: 'Multi-tool / knife', description: 'Pocket knife or multi-tool packed' },
+  { value: 'navigation', emoji: '🗺️', label: 'GPS / navigation', description: 'Sat-nav or GPS device in the car' },
   { value: 'awning', emoji: '🏕️', label: 'Awning / canopy', description: 'Vehicle awning or sun shelter' },
   { value: 'water-tank', emoji: '💧', label: 'Water tank / carrier', description: 'Jerry can or built-in water tank' },
+  { value: 'roof-box', emoji: '📦', label: 'Roof box / cargo', description: 'Extra storage on the roof' },
 ];
 
 const FUEL_OPTIONS: Option<FuelSource>[] = [

@@ -4,7 +4,7 @@ import { generateId } from '../utils/id';
 export type SleepSetup = 'tent' | 'car' | 'car-tent' | 'van';
 export type EatingSetup = 'stove' | 'campfire' | 'bbq' | 'cold-food' | 'freeze-dried' | 'restaurants';
 export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
-export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table' | 'lighting' | 'first-aid-kit' | 'awning' | 'water-tank';
+export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table' | 'lighting' | 'first-aid-kit' | 'awning' | 'water-tank' | 'cookware' | 'multi-tool' | 'navigation' | 'roof-box';
 export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling' | 'trail-running' | 'photography' | 'yoga' | 'stargazing' | 'surfing';
 export type Duration = 'day' | 'short' | 'medium' | 'long';
 export type WeatherCondition = 'cold' | 'cold-nights' | 'snow' | 'rain' | 'wind' | 'extreme-heat' | 'high-uv' | 'humid';
@@ -118,6 +118,9 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   const vHasChairsTable = vehicleEquipment.includes('chairs-table');
   const vHasLighting = vehicleEquipment.includes('lighting');
   const vHasFirstAidKit = vehicleEquipment.includes('first-aid-kit');
+  const vHasCookware = vehicleEquipment.includes('cookware');
+  const vHasMultiTool = vehicleEquipment.includes('multi-tool');
+  const vHasNavigation = vehicleEquipment.includes('navigation');
 
   const eating = eatingSetup;
   const hasStoveCooking = eating.includes('stove');
@@ -189,28 +192,34 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   if (hasBBQ) {
     raw.push({ name: 'Portable BBQ / grill', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Charcoal / briquettes', category: 'cooking', quantity: isLong ? 3 : 1 });
-    raw.push({ name: 'BBQ tongs', category: 'cooking', quantity: 1 });
+    if (!vHasCookware) raw.push({ name: 'BBQ tongs', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 });
   }
 
   if (hasColdFood) {
     if (!vHasFridge) raw.push({ name: 'Camping cooler', category: 'cooking', quantity: 1 });
-    raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
+    if (!vHasMultiTool && !vHasCookware) raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
   }
 
   if (hasRealCooking) {
-    raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
-    if (hasStoveCooking || hasBBQ) raw.push({ name: 'Pan', category: 'cooking', quantity: 1 });
-    raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
-    raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
-    raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
+    if (!vHasCookware) {
+      raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
+      if (hasStoveCooking || hasBBQ) raw.push({ name: 'Pan', category: 'cooking', quantity: 1 });
+      raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
+      raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
+      raw.push({ name: 'Mug', category: 'cooking', quantity: ppl });
+    }
     if (isCold) raw.push({ name: 'Thermos', category: 'cooking', quantity: adults });
   } else if (hasFreezeDried) {
-    raw.push({ name: 'Mug / bowl', category: 'cooking', quantity: ppl });
-    raw.push({ name: 'Spork', category: 'cooking', quantity: ppl });
+    if (!vHasCookware) {
+      raw.push({ name: 'Mug / bowl', category: 'cooking', quantity: ppl });
+      raw.push({ name: 'Spork', category: 'cooking', quantity: ppl });
+    }
   } else if (hasColdFood) {
-    raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
-    raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
+    if (!vHasCookware) {
+      raw.push({ name: 'Plate', category: 'cooking', quantity: ppl });
+      raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
+    }
   }
 
   raw.push({ name: 'Reusable water bottle', category: 'cooking', quantity: isHot ? ppl * 2 : ppl });
@@ -249,7 +258,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
 
   // ── TOOLS ────────────────────────────────────────────────────────
   raw.push({ name: 'Headlamp', category: 'tools', quantity: ppl });
-  if (overnight) raw.push({ name: 'Pocket knife', category: 'tools', quantity: 1 });
+  if (overnight && !vHasMultiTool) raw.push({ name: 'Pocket knife', category: 'tools', quantity: 1 });
 
   const usingElectric = fuelSource === 'electric';
   if ((isLong || sleepSetup === 'van') && !vHasInverter && !usingElectric) {
@@ -279,7 +288,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   // ── ACTIVITY GEAR ────────────────────────────────────────────────
   if (activities.includes('hiking')) {
     raw.push({ name: 'Trekking poles', category: 'tools', quantity: adults * 2 });
-    raw.push({ name: 'Map + compass', category: 'tools', quantity: 1 });
+    if (!vHasNavigation) raw.push({ name: 'Map + compass', category: 'tools', quantity: 1 });
     raw.push({ name: 'Hiking boots', category: 'clothing', quantity: adults });
     if (hasSnow) raw.push({ name: 'Gaiters', category: 'clothing', quantity: adults });
     raw.push({ name: 'Blister pads', category: 'first-aid', quantity: 1 });
