@@ -1,26 +1,22 @@
 import { useState } from 'react';
-import type { Trip } from '../types';
+import { useNavigate } from '@tanstack/react-router';
 import { useTrips } from '../hooks/useTrips';
 import { useTemplates } from '../hooks/useTemplates';
 import { TripCard } from '../components/trips/TripCard';
 import { TripForm } from '../components/trips/TripForm';
 import { Button } from '../components/ui/Button';
 
-interface HomeProps {
-  onSelectTrip: (trip: Trip) => void;
-}
-
-export function Home({ onSelectTrip }: HomeProps) {
+export function Home() {
+  const navigate = useNavigate();
   const { trips, createTrip, deleteTrip } = useTrips();
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
 
   function handleCreate(data: Parameters<typeof createTrip>[0]) {
     const template = templates.find((t) => t.id === data.templateId);
-    const items = template ? template.items : [];
-    const trip = createTrip(data, items);
+    const trip = createTrip(data, template ? template.items : []);
     setShowForm(false);
-    onSelectTrip(trip);
+    void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
   }
 
   return (
@@ -66,7 +62,7 @@ export function Home({ onSelectTrip }: HomeProps) {
               key={trip.id}
               trip={trip}
               onClick={() => {
-                onSelectTrip(trip);
+                void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
               }}
               onDelete={() => {
                 deleteTrip(trip.id);

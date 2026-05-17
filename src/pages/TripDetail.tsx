@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Trip } from '../types';
+import { useEffect, useState } from 'react';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import type { GearCategory } from '../types';
 import { useTrips } from '../hooks/useTrips';
 import { useTemplates } from '../hooks/useTemplates';
@@ -11,12 +11,11 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { formatDate } from '../utils/date';
 
-interface TripDetailProps {
-  trip: Trip;
-  onBack: () => void;
-}
+const Route = getRouteApi('/trips/$tripId');
 
-export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
+export function TripDetail() {
+  const { tripId } = Route.useParams();
+  const navigate = useNavigate();
   const { trips, toggleItem, addItem, removeItem, updateTrip } = useTrips();
   const { createTemplateFromTrip } = useTemplates();
 
@@ -26,7 +25,18 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
   const [editDate, setEditDate] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 
-  const trip = trips.find((t) => t.id === initialTrip.id) ?? initialTrip;
+  const tripOrUndef = trips.find((t) => t.id === tripId);
+
+  useEffect(() => {
+    if (!tripOrUndef) {
+      void navigate({ to: '/' });
+    }
+  }, [tripOrUndef, navigate]);
+
+  if (!tripOrUndef) return null;
+  // Const rebinding after the guard so closures (startEdit etc.) see Trip, not Trip | undefined
+  const trip = tripOrUndef;
+
   const packed = trip.items.filter((i) => i.packed).length;
 
   const itemsByCategory = CATEGORIES.reduce<Record<GearCategory, typeof trip.items>>(
@@ -66,7 +76,9 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
   return (
     <div className="p-4 max-w-lg mx-auto pb-24">
       <button
-        onClick={onBack}
+        onClick={() => {
+          void navigate({ to: '/' });
+        }}
         className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-4 -ml-1 p-1 rounded"
       >
         <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
