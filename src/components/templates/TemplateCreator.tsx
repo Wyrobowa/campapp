@@ -177,7 +177,6 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
     eatingSetup: [],
     group: { adults: 1, kids: 0, pets: 0 },
   });
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [templateName, setTemplateName] = useState('');
   const [items, setItems] = useState<GeneratedItem[]>([]);
 
@@ -220,17 +219,20 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
     setAnswers((prev) => ({ ...prev, group: { ...prev.group, [field]: value } }));
   }
 
-  function handleDateRange(field: 'start' | 'end', value: string) {
-    const next = { ...dateRange, [field]: value };
-    setDateRange(next);
-    if (next.start && next.end && next.end >= next.start) {
-      const nights = Math.round(
-        (new Date(next.end).getTime() - new Date(next.start).getTime()) / 86400000
-      );
-      const duration: Duration =
-        nights <= 0 ? 'day' : nights <= 2 ? 'short' : nights <= 5 ? 'medium' : 'long';
-      setAnswers((prev) => ({ ...prev, duration }));
-    }
+  function handleDateRange(field: 'startDate' | 'endDate', value: string) {
+    setAnswers((prev) => {
+      const next = { ...prev, [field]: value };
+      const start = next.startDate ?? '';
+      const end = next.endDate ?? '';
+      if (start && end && end >= start) {
+        const nights = Math.round(
+          (new Date(end).getTime() - new Date(start).getTime()) / 86400000
+        );
+        next.duration =
+          nights <= 0 ? 'day' : nights <= 2 ? 'short' : nights <= 5 ? 'medium' : 'long';
+      }
+      return next;
+    });
   }
 
   function handleContinue() {
@@ -337,8 +339,8 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                 <label className="text-sm font-medium text-gray-700">Start date</label>
                 <input
                   type="date"
-                  value={dateRange.start}
-                  onChange={(e) => handleDateRange('start', e.target.value)}
+                  value={answers.startDate ?? ''}
+                  onChange={(e) => handleDateRange('startDate', e.target.value)}
                   className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
                 />
               </div>
@@ -346,9 +348,9 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                 <label className="text-sm font-medium text-gray-700">End date</label>
                 <input
                   type="date"
-                  value={dateRange.end}
-                  min={dateRange.start}
-                  onChange={(e) => handleDateRange('end', e.target.value)}
+                  value={answers.endDate ?? ''}
+                  min={answers.startDate ?? ''}
+                  onChange={(e) => handleDateRange('endDate', e.target.value)}
                   className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
                 />
               </div>

@@ -22,6 +22,8 @@ export interface CreatorAnswers {
   vehicleEquipment: VehicleEquipment[];
   activities: Activity[];
   duration: Duration;
+  startDate?: string;
+  endDate?: string;
   group: GroupComposition;
   season: Season;
 }
@@ -79,7 +81,7 @@ export function generateTemplateName(answers: CreatorAnswers): string {
 }
 
 export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
-  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, group, season } = answers;
+  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, startDate, endDate, group, season } = answers;
 
   const adults = group.adults;
   const kids = group.kids;
@@ -88,13 +90,17 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   const hasKids = kids > 0;
   const hasPet = pets > 0;
 
-  const overnight = duration !== 'day';
+  const nights =
+    startDate && endDate
+      ? Math.max(0, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000))
+      : duration === 'day' ? 0 : duration === 'short' ? 2 : duration === 'medium' ? 4 : 8;
+
+  const overnight = nights > 0;
   const isWinter = season === 'winter';
   const isCold = season !== 'summer';
-  const isLong = duration === 'medium' || duration === 'long';
-  const isVeryLong = duration === 'long';
+  const isLong = nights >= 3;
   const isLargeGroup = ppl >= 6;
-  const socks = isVeryLong ? 7 : isLong ? 4 : 3;
+  const socks = Math.min(Math.max(3, nights + 1), 10);
 
   const isVehicleSleep = sleepSetup === 'car' || sleepSetup === 'van' || sleepSetup === 'car-tent';
   const vHasFridge = vehicleEquipment.includes('fridge');
@@ -151,10 +157,10 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     const fuel = fuelSource ?? 'gas';
     if (fuel === 'gas') {
       raw.push({ name: isWinter ? 'Cold-weather gas stove' : 'Gas stove', category: 'cooking', quantity: 1 });
-      raw.push({ name: isWinter ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: isVeryLong ? 3 : isLong ? 2 : 1 });
+      raw.push({ name: isWinter ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 2.5)) });
     } else if (fuel === 'alcohol') {
       raw.push({ name: 'Alcohol stove', category: 'cooking', quantity: 1 });
-      raw.push({ name: 'Alcohol fuel bottle', category: 'cooking', quantity: isLong ? 2 : 1 });
+      raw.push({ name: 'Alcohol fuel bottle', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 4)) });
     } else if (fuel === 'electric') {
       raw.push({ name: 'Portable induction cooktop', category: 'cooking', quantity: 1 });
       if (!vHasInverter) raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
