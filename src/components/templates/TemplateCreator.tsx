@@ -384,7 +384,7 @@ function StepperRow({
             onChange(Math.max(min, value - 1));
           }}
           disabled={value <= min}
-          className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:border-[#2D5016] hover:text-[#2D5016] transition-colors"
+          className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:border-forest hover:text-forest transition-colors"
           aria-label={`Decrease ${label}`}
         >
           <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
@@ -398,7 +398,7 @@ function StepperRow({
           onClick={() => {
             onChange(value + 1);
           }}
-          className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 hover:border-[#2D5016] hover:text-[#2D5016] transition-colors"
+          className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 hover:border-forest hover:text-forest transition-colors"
           aria-label={`Increase ${label}`}
         >
           <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
@@ -612,7 +612,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
         {questions.map((_, i) => (
           <div
             key={i}
-            className={`h-1 rounded-full flex-1 transition-colors duration-300 ${i <= step ? 'bg-[#2D5016]' : 'bg-gray-200'}`}
+            className={`h-1 rounded-full flex-1 transition-colors duration-300 ${i <= step ? 'bg-forest' : 'bg-gray-200'}`}
           />
         ))}
       </div>
@@ -629,7 +629,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                 [multiKey as MultiKey]: allOptionsSelected ? [] : all,
               }));
             }}
-            className="text-xs font-medium text-[#2D5016] hover:underline flex-shrink-0"
+            className="text-xs font-medium text-forest hover:underline flex-shrink-0"
           >
             {allOptionsSelected ? 'Clear all' : 'Select all'}
           </button>
@@ -678,7 +678,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                   onChange={(e) => {
                     handleDateRange('startDate', e.target.value);
                   }}
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
+                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
                 />
               </div>
               <div className="flex-1 flex flex-col gap-1">
@@ -690,7 +690,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                   onChange={(e) => {
                     handleDateRange('endDate', e.target.value);
                   }}
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
+                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
                 />
               </div>
             </div>
@@ -711,12 +711,12 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                       handleSingleSelect(question.key as SingleKey, option.value);
                     }
                   }}
-                  className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${isSelected ? 'border-[#2D5016] bg-[#F0F4EC]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                  className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${isSelected ? 'border-forest bg-surface' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                 >
                   <div className="w-full flex items-start justify-between mb-2">
                     <span className="text-2xl">{option.emoji}</span>
                     {isMulti && isSelected && (
-                      <span className="w-5 h-5 rounded-full bg-[#2D5016] flex items-center justify-center flex-shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-forest flex items-center justify-center flex-shrink-0">
                         <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
                           <path
                             d="M2 6l3 3 5-5"

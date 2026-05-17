@@ -23,7 +23,7 @@ export function Home() {
     <div className="p-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D5016]">CampApp</h1>
+          <h1 className="text-2xl font-bold text-forest">CampApp</h1>
           <p className="text-sm text-gray-500">Your trips</p>
         </div>
         {!showForm && (

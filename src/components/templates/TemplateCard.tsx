@@ -13,7 +13,7 @@ export function TemplateCard({ template, onUse, onDelete }: TemplateCardProps) {
       <div className="flex justify-between items-start mb-1">
         <h3 className="font-semibold text-gray-900 text-base leading-tight">{template.name}</h3>
         {template.isDefault && (
-          <span className="text-xs bg-[#F0F4EC] text-[#2D5016] px-2 py-0.5 rounded-full font-medium">
+          <span className="text-xs bg-surface text-forest px-2 py-0.5 rounded-full font-medium">
             Default
           </span>
         )}

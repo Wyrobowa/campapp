@@ -14,7 +14,7 @@ export function ChecklistItem({ item, onToggle, onRemove }: ChecklistItemProps) 
           onToggle(item.id);
         }}
         className={`w-6 h-6 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-          item.packed ? 'bg-[#2D5016] border-[#2D5016]' : 'border-gray-300 hover:border-[#2D5016]'
+          item.packed ? 'bg-forest border-forest' : 'border-gray-300 hover:border-forest'
         }`}
         aria-label={item.packed ? 'Uncheck' : 'Mark as packed'}
       >

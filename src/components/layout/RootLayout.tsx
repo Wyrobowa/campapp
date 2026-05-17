@@ -14,7 +14,7 @@ function NavBar() {
   const tripsActive = pathname === '/' || pathname.startsWith('/trips');
   const templatesActive = pathname.startsWith('/templates');
 
-  const active = 'text-[#2D5016]';
+  const active = 'text-forest';
   const inactive = 'text-gray-400';
 
   return (
@@ -62,14 +62,14 @@ export function RootLayout() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-[#FAFAF5] flex items-center justify-center">
+      <div className="min-h-screen bg-bg flex items-center justify-center">
         <p className="text-sm text-gray-400">Loading…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF5]">
+    <div className="min-h-screen bg-bg">
       <Outlet />
       <NavBar />
       <div className="h-16" />

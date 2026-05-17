@@ -22,7 +22,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-4 bg-[#F0F4EC] rounded-xl">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-4 bg-surface rounded-xl">
       <Input
         label="Item name"
         value={name}
@@ -39,7 +39,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
             onChange={(e) => {
               setCategory(e.target.value as GearCategory);
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016] bg-white"
+            className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest bg-white"
           >
             {CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>
@@ -57,7 +57,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
             onChange={(e) => {
               setQuantity(Math.max(1, parseInt(e.target.value) || 1));
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
+            className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
           />
         </div>
       </div>

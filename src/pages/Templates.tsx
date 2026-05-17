@@ -29,7 +29,7 @@ export function Templates() {
     <div className="p-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D5016]">Templates</h1>
+          <h1 className="text-2xl font-bold text-forest">Templates</h1>
           <p className="text-sm text-gray-500">Ready-made gear lists</p>
         </div>
         <Button
