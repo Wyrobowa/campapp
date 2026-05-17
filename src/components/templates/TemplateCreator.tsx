@@ -1,7 +1,16 @@
 import { useState } from 'react';
 import type {
-  CreatorAnswers, SleepSetup, EatingSetup, FuelSource, VehicleEquipment,
-  Activity, Duration, GroupComposition, WeatherCondition, GeneratedItem,
+  CreatorAnswers,
+  SleepSetup,
+  TentCapacity,
+  EatingSetup,
+  FuelSource,
+  VehicleEquipment,
+  Activity,
+  Duration,
+  GroupComposition,
+  WeatherCondition,
+  GeneratedItem,
 } from '../../data/templateGenerator';
 
 import { generateItems, generateTemplateName } from '../../data/templateGenerator';
@@ -26,38 +35,155 @@ interface Option<T extends string> {
 const SLEEP_OPTIONS: Option<SleepSetup>[] = [
   { value: 'tent', emoji: '⛺', label: 'Tent', description: 'Traditional tent setup' },
   { value: 'car', emoji: '🚗', label: 'In the car', description: 'Sleeping in your car' },
-  { value: 'car-tent', emoji: '🏕️', label: 'Car / roof tent', description: 'Tent attached to the car' },
-  { value: 'van', emoji: '🚐', label: 'Van / campervan', description: 'Converted van or motorhome' },
+  {
+    value: 'car-tent',
+    emoji: '🏕️',
+    label: 'Car / roof tent',
+    description: 'Tent attached to the car',
+  },
+  {
+    value: 'van',
+    emoji: '🚐',
+    label: 'Van / campervan',
+    description: 'Converted van or motorhome',
+  },
+];
+
+const TENT_CAPACITY_OPTIONS: Option<TentCapacity>[] = [
+  { value: '1', emoji: '🙋', label: '1-person', description: 'Ultralight solo shelter' },
+  { value: '2', emoji: '👫', label: '2-person', description: 'Couples or solo with comfort' },
+  { value: '3', emoji: '🧑‍🤝‍🧑', label: '3-person', description: 'Small group or trio' },
+  { value: '4', emoji: '👨‍👩‍👧‍👦', label: '4+ person', description: 'Large family or basecamp tent' },
 ];
 
 const EAT_OPTIONS: Option<EatingSetup>[] = [
-  { value: 'stove', emoji: '🍳', label: 'Camp stove', description: 'Hot meals on a portable stove' },
-  { value: 'campfire', emoji: '🔥', label: 'Campfire cooking', description: 'Cooking over an open fire' },
+  {
+    value: 'stove',
+    emoji: '🍳',
+    label: 'Camp stove',
+    description: 'Hot meals on a portable stove',
+  },
+  {
+    value: 'campfire',
+    emoji: '🔥',
+    label: 'Campfire cooking',
+    description: 'Cooking over an open fire',
+  },
   { value: 'bbq', emoji: '🥩', label: 'BBQ / grilling', description: 'Charcoal or portable grill' },
-  { value: 'cold-food', emoji: '🥗', label: 'Cold food & snacks', description: 'No cooking needed' },
-  { value: 'freeze-dried', emoji: '🧂', label: 'Freeze-dried meals', description: 'Just add boiling water' },
-  { value: 'restaurants', emoji: '🍽️', label: 'Restaurants & cafés', description: 'Mostly eating out' },
+  {
+    value: 'cold-food',
+    emoji: '🥗',
+    label: 'Cold food & snacks',
+    description: 'No cooking needed',
+  },
+  {
+    value: 'freeze-dried',
+    emoji: '🧂',
+    label: 'Freeze-dried meals',
+    description: 'Just add boiling water',
+  },
+  {
+    value: 'restaurants',
+    emoji: '🍽️',
+    label: 'Restaurants & cafés',
+    description: 'Mostly eating out',
+  },
 ];
 
 const VEHICLE_OPTIONS: Option<VehicleEquipment>[] = [
-  { value: 'fridge', emoji: '🧊', label: 'Fridge / cooler', description: 'Car fridge or portable cooler' },
-  { value: 'stove', emoji: '🍳', label: 'Camp stove / kitchen', description: 'Cooking setup already packed' },
-  { value: 'cookware', emoji: '🍽️', label: 'Cookware set', description: 'Pots, pans, plates, cutlery, mugs' },
-  { value: 'inverter', emoji: '⚡', label: 'Power inverter / solar', description: 'Shore power, inverter or solar' },
-  { value: 'chairs-table', emoji: '🪑', label: 'Chairs & table', description: 'Camping furniture already in the car' },
-  { value: 'lighting', emoji: '💡', label: 'Lighting', description: 'Lantern or string lights packed' },
-  { value: 'first-aid-kit', emoji: '🩺', label: 'First aid kit', description: 'Full kit already in the car' },
-  { value: 'multi-tool', emoji: '🔧', label: 'Multi-tool / knife', description: 'Pocket knife or multi-tool packed' },
-  { value: 'navigation', emoji: '🗺️', label: 'GPS / navigation', description: 'Sat-nav or GPS device in the car' },
-  { value: 'awning', emoji: '🏕️', label: 'Awning / canopy', description: 'Vehicle awning or sun shelter' },
-  { value: 'water-tank', emoji: '💧', label: 'Water tank / carrier', description: 'Jerry can or built-in water tank' },
-  { value: 'roof-box', emoji: '📦', label: 'Roof box / cargo', description: 'Extra storage on the roof' },
+  {
+    value: 'fridge',
+    emoji: '🧊',
+    label: 'Fridge / cooler',
+    description: 'Car fridge or portable cooler',
+  },
+  {
+    value: 'stove',
+    emoji: '🍳',
+    label: 'Camp stove / kitchen',
+    description: 'Cooking setup already packed',
+  },
+  {
+    value: 'cookware',
+    emoji: '🍽️',
+    label: 'Cookware set',
+    description: 'Pots, pans, plates, cutlery, mugs',
+  },
+  {
+    value: 'inverter',
+    emoji: '⚡',
+    label: 'Power inverter / solar',
+    description: 'Shore power, inverter or solar',
+  },
+  {
+    value: 'chairs-table',
+    emoji: '🪑',
+    label: 'Chairs & table',
+    description: 'Camping furniture already in the car',
+  },
+  {
+    value: 'lighting',
+    emoji: '💡',
+    label: 'Lighting',
+    description: 'Lantern or string lights packed',
+  },
+  {
+    value: 'first-aid-kit',
+    emoji: '🩺',
+    label: 'First aid kit',
+    description: 'Full kit already in the car',
+  },
+  {
+    value: 'multi-tool',
+    emoji: '🔧',
+    label: 'Multi-tool / knife',
+    description: 'Pocket knife or multi-tool packed',
+  },
+  {
+    value: 'navigation',
+    emoji: '🗺️',
+    label: 'GPS / navigation',
+    description: 'Sat-nav or GPS device in the car',
+  },
+  {
+    value: 'awning',
+    emoji: '🏕️',
+    label: 'Awning / canopy',
+    description: 'Vehicle awning or sun shelter',
+  },
+  {
+    value: 'water-tank',
+    emoji: '💧',
+    label: 'Water tank / carrier',
+    description: 'Jerry can or built-in water tank',
+  },
+  {
+    value: 'roof-box',
+    emoji: '📦',
+    label: 'Roof box / cargo',
+    description: 'Extra storage on the roof',
+  },
 ];
 
 const FUEL_OPTIONS: Option<FuelSource>[] = [
-  { value: 'gas', emoji: '⛽', label: 'Gas canister stove', description: 'Most common, easy to find' },
-  { value: 'alcohol', emoji: '🍶', label: 'Alcohol stove', description: 'Lightweight, ultralight setups' },
-  { value: 'electric', emoji: '⚡', label: 'Electric / induction', description: 'Needs a power source' },
+  {
+    value: 'gas',
+    emoji: '⛽',
+    label: 'Gas canister stove',
+    description: 'Most common, easy to find',
+  },
+  {
+    value: 'alcohol',
+    emoji: '🍶',
+    label: 'Alcohol stove',
+    description: 'Lightweight, ultralight setups',
+  },
+  {
+    value: 'electric',
+    emoji: '⚡',
+    label: 'Electric / induction',
+    description: 'Needs a power source',
+  },
   { value: 'campfire', emoji: '🔥', label: 'Campfire', description: 'Wood fire where permitted' },
 ];
 
@@ -69,7 +195,12 @@ const ACTIVITY_OPTIONS: Option<Activity>[] = [
   { value: 'fishing', emoji: '🎣', label: 'Fishing', description: 'Angling or fly fishing' },
   { value: 'paddling', emoji: '🛶', label: 'Paddling', description: 'Kayak, canoe or SUP' },
   { value: 'trail-running', emoji: '🏃', label: 'Trail running', description: 'Off-road running' },
-  { value: 'photography', emoji: '📷', label: 'Photography', description: 'Camera gear and tripod' },
+  {
+    value: 'photography',
+    emoji: '📷',
+    label: 'Photography',
+    description: 'Camera gear and tripod',
+  },
   { value: 'yoga', emoji: '🧘', label: 'Yoga', description: 'Mat and mindful movement' },
   { value: 'stargazing', emoji: '🔭', label: 'Stargazing', description: 'Night sky observation' },
   { value: 'surfing', emoji: '🏄', label: 'Surfing', description: 'Waves and watersports' },
@@ -84,13 +215,28 @@ const DURATION_OPTIONS: Option<Duration>[] = [
 
 const WEATHER_OPTIONS: Option<WeatherCondition>[] = [
   { value: 'cold', emoji: '🥶', label: 'Cold days', description: 'Temperatures below 10 °C' },
-  { value: 'cold-nights', emoji: '🌙', label: 'Cold nights', description: 'Nights near or below freezing' },
+  {
+    value: 'cold-nights',
+    emoji: '🌙',
+    label: 'Cold nights',
+    description: 'Nights near or below freezing',
+  },
   { value: 'snow', emoji: '❄️', label: 'Snow / ice', description: 'Snow or icy terrain expected' },
   { value: 'rain', emoji: '🌧️', label: 'Rain', description: 'Wet weather likely' },
   { value: 'wind', emoji: '💨', label: 'Strong wind', description: 'Exposed or windy terrain' },
-  { value: 'extreme-heat', emoji: '🥵', label: 'Extreme heat', description: 'Scorching sun and high temps' },
+  {
+    value: 'extreme-heat',
+    emoji: '🥵',
+    label: 'Extreme heat',
+    description: 'Scorching sun and high temps',
+  },
   { value: 'high-uv', emoji: '🔆', label: 'High UV', description: 'Intense sun exposure' },
-  { value: 'humid', emoji: '💦', label: 'High humidity', description: 'Sticky and humid conditions' },
+  {
+    value: 'humid',
+    emoji: '💦',
+    label: 'High humidity',
+    description: 'Sticky and humid conditions',
+  },
 ];
 
 // ── QUESTION DEFINITIONS ─────────────────────────────────────────
@@ -104,14 +250,78 @@ interface QuestionDef {
   cols: 1 | 2;
 }
 
-const SLEEP_Q: QuestionDef = { key: 'sleepSetup', heading: 'Where will you sleep?', subheading: 'Your main sleeping setup for this trip.', multiSelect: false, options: SLEEP_OPTIONS, cols: 2 };
-const EAT_Q: QuestionDef = { key: 'eatingSetup', heading: 'How will you eat?', subheading: 'Select all that apply.', multiSelect: true, options: EAT_OPTIONS, cols: 2 };
-const VEHICLE_Q: QuestionDef = { key: 'vehicleEquipment', heading: "What's already in your vehicle?", subheading: "Select what you've already packed — we'll skip duplicates from your list.", multiSelect: true, options: VEHICLE_OPTIONS, cols: 2 };
-const FUEL_Q: QuestionDef = { key: 'fuelSource', heading: 'What will you cook on?', subheading: 'Determines which stove and fuel to add to your list.', multiSelect: false, options: FUEL_OPTIONS, cols: 2 };
-const ACTIVITIES_Q: QuestionDef = { key: 'activities', heading: 'Any planned activities?', subheading: 'Select all that apply. Skip if none.', multiSelect: true, options: ACTIVITY_OPTIONS, cols: 2 };
-const DURATION_Q: QuestionDef = { key: 'duration', heading: 'How long is the trip?', subheading: 'Affects quantities and supply planning.', multiSelect: false, options: DURATION_OPTIONS, cols: 2 };
-const GROUP_Q: QuestionDef = { key: 'group', heading: "Who's coming?", subheading: 'Sets quantities for personal gear.', multiSelect: false, options: [], cols: 1 };
-const WEATHER_Q: QuestionDef = { key: 'weather', heading: 'What weather do you expect?', subheading: 'Select all that apply. Skip if unsure.', multiSelect: true, options: WEATHER_OPTIONS, cols: 2 };
+const SLEEP_Q: QuestionDef = {
+  key: 'sleepSetup',
+  heading: 'Where will you sleep?',
+  subheading: 'Your main sleeping setup for this trip.',
+  multiSelect: false,
+  options: SLEEP_OPTIONS,
+  cols: 2,
+};
+const TENT_CAPACITY_Q: QuestionDef = {
+  key: 'tentCapacity',
+  heading: 'How many does your tent sleep?',
+  subheading: "We'll work out how many tents your group needs.",
+  multiSelect: false,
+  options: TENT_CAPACITY_OPTIONS,
+  cols: 2,
+};
+const EAT_Q: QuestionDef = {
+  key: 'eatingSetup',
+  heading: 'How will you eat?',
+  subheading: 'Select all that apply.',
+  multiSelect: true,
+  options: EAT_OPTIONS,
+  cols: 2,
+};
+const VEHICLE_Q: QuestionDef = {
+  key: 'vehicleEquipment',
+  heading: "What's already in your vehicle?",
+  subheading: "Select what you've already packed — we'll skip duplicates from your list.",
+  multiSelect: true,
+  options: VEHICLE_OPTIONS,
+  cols: 2,
+};
+const FUEL_Q: QuestionDef = {
+  key: 'fuelSource',
+  heading: 'What will you cook on?',
+  subheading: 'Determines which stove and fuel to add to your list.',
+  multiSelect: false,
+  options: FUEL_OPTIONS,
+  cols: 2,
+};
+const ACTIVITIES_Q: QuestionDef = {
+  key: 'activities',
+  heading: 'Any planned activities?',
+  subheading: 'Select all that apply. Skip if none.',
+  multiSelect: true,
+  options: ACTIVITY_OPTIONS,
+  cols: 2,
+};
+const DURATION_Q: QuestionDef = {
+  key: 'duration',
+  heading: 'How long is the trip?',
+  subheading: 'Affects quantities and supply planning.',
+  multiSelect: false,
+  options: DURATION_OPTIONS,
+  cols: 2,
+};
+const GROUP_Q: QuestionDef = {
+  key: 'group',
+  heading: "Who's coming?",
+  subheading: 'Sets quantities for personal gear.',
+  multiSelect: false,
+  options: [],
+  cols: 1,
+};
+const WEATHER_Q: QuestionDef = {
+  key: 'weather',
+  heading: 'What weather do you expect?',
+  subheading: 'Select all that apply. Skip if unsure.',
+  multiSelect: true,
+  options: WEATHER_OPTIONS,
+  cols: 2,
+};
 
 // ── TYPES ────────────────────────────────────────────────────────
 
@@ -129,11 +339,18 @@ type PartialAnswers = Omit<Partial<CreatorAnswers>, MultiKey | 'group'> & {
 // ── DYNAMIC QUESTION BUILDER ─────────────────────────────────────
 
 function computeQuestions(answers: PartialAnswers): QuestionDef[] {
-  const isVehicleSleep = answers.sleepSetup === 'car' || answers.sleepSetup === 'van' || answers.sleepSetup === 'car-tent';
-  const needsFuel = (answers.eatingSetup.includes('stove') || answers.eatingSetup.includes('freeze-dried'))
-    && !answers.vehicleEquipment.includes('stove');
+  const isTent = answers.sleepSetup === 'tent';
+  const isVehicleSleep =
+    answers.sleepSetup === 'car' ||
+    answers.sleepSetup === 'van' ||
+    answers.sleepSetup === 'car-tent';
+  const needsFuel =
+    (answers.eatingSetup.includes('stove') || answers.eatingSetup.includes('freeze-dried')) &&
+    !answers.vehicleEquipment.includes('stove');
 
-  const qs: QuestionDef[] = [SLEEP_Q, EAT_Q];
+  const qs: QuestionDef[] = [SLEEP_Q];
+  if (isTent) qs.push(TENT_CAPACITY_Q);
+  qs.push(EAT_Q);
   if (isVehicleSleep) qs.push(VEHICLE_Q);
   if (needsFuel) qs.push(FUEL_Q);
   qs.push(ACTIVITIES_Q, DURATION_Q, GROUP_Q, WEATHER_Q);
@@ -142,7 +359,13 @@ function computeQuestions(answers: PartialAnswers): QuestionDef[] {
 
 // ── STEPPER ROW ──────────────────────────────────────────────────
 
-function StepperRow({ label, subtitle, value, min = 0, onChange }: {
+function StepperRow({
+  label,
+  subtitle,
+  value,
+  min = 0,
+  onChange,
+}: {
   label: string;
   subtitle?: string;
   value: number;
@@ -157,7 +380,9 @@ function StepperRow({ label, subtitle, value, min = 0, onChange }: {
       </div>
       <div className="flex items-center gap-4">
         <button
-          onClick={() => onChange(Math.max(min, value - 1))}
+          onClick={() => {
+            onChange(Math.max(min, value - 1));
+          }}
           disabled={value <= min}
           className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:border-[#2D5016] hover:text-[#2D5016] transition-colors"
           aria-label={`Decrease ${label}`}
@@ -166,9 +391,13 @@ function StepperRow({ label, subtitle, value, min = 0, onChange }: {
             <path d="M4 8h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
-        <span className="w-5 text-center font-semibold text-gray-900 text-base tabular-nums">{value}</span>
+        <span className="w-5 text-center font-semibold text-gray-900 text-base tabular-nums">
+          {value}
+        </span>
         <button
-          onClick={() => onChange(value + 1)}
+          onClick={() => {
+            onChange(value + 1);
+          }}
           className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 hover:border-[#2D5016] hover:text-[#2D5016] transition-colors"
           aria-label={`Increase ${label}`}
         >
@@ -178,6 +407,28 @@ function StepperRow({ label, subtitle, value, min = 0, onChange }: {
         </button>
       </div>
     </div>
+  );
+}
+
+// ── BACK BUTTON ──────────────────────────────────────────────────
+
+function BackButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-6 -ml-1 p-1 rounded"
+    >
+      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M10 4L6 8l4 4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {label}
+    </button>
   );
 }
 
@@ -240,9 +491,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
       const start = next.startDate ?? '';
       const end = next.endDate ?? '';
       if (start && end && end >= start) {
-        const nights = Math.round(
-          (new Date(end).getTime() - new Date(start).getTime()) / 86400000
-        );
+        const nights = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000);
         next.duration =
           nights <= 0 ? 'day' : nights <= 2 ? 'short' : nights <= 5 ? 'medium' : 'long';
       }
@@ -269,49 +518,72 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
     onSave(templateName.trim(), items);
   }
 
-  const BackButton = ({ label }: { label: string }) => (
-    <button onClick={handleBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-6 -ml-1 p-1 rounded">
-      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-        <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      {label}
-    </button>
-  );
-
   // ── REVIEW ───────────────────────────────────────────────────────
   if (isReview) {
-    const categoriesWithItems = CATEGORIES.filter((c) => items.some((item) => item.category === c.id));
+    const categoriesWithItems = CATEGORIES.filter((c) =>
+      items.some((item) => item.category === c.id)
+    );
     return (
       <div className="p-4 max-w-lg mx-auto">
-        <BackButton label="Back" />
+        <BackButton label="Back" onClick={handleBack} />
         <h2 className="text-xl font-bold text-gray-900 mb-1">Your template</h2>
         <p className="text-sm text-gray-500 mb-5">Remove items you don't need, then save.</p>
         <div className="mb-5">
-          <Input label="Template name" value={templateName} onChange={(e) => setTemplateName(e.target.value)} />
+          <Input
+            label="Template name"
+            value={templateName}
+            onChange={(e) => {
+              setTemplateName(e.target.value);
+            }}
+          />
         </div>
         <div className="space-y-5 mb-6">
           {categoriesWithItems.map((cat) => (
             <div key={cat.id}>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{cat.emoji} {cat.label}</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                {cat.emoji} {cat.label}
+              </p>
               <ul className="space-y-1">
-                {items.filter((item) => item.category === cat.id).map((item) => (
-                  <li key={item.id} className="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100">
-                    <span className="text-sm text-gray-800">
-                      {item.name}
-                      {item.quantity > 1 && <span className="ml-1.5 text-xs text-gray-400">×{item.quantity}</span>}
-                    </span>
-                    <button onClick={() => handleRemoveItem(item.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1 rounded" aria-label="Remove item">
-                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </button>
-                  </li>
-                ))}
+                {items
+                  .filter((item) => item.category === cat.id)
+                  .map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100"
+                    >
+                      <span className="text-sm text-gray-800">
+                        {item.name}
+                        {item.quantity > 1 && (
+                          <span className="ml-1.5 text-xs text-gray-400">×{item.quantity}</span>
+                        )}
+                      </span>
+                      <button
+                        onClick={() => {
+                          handleRemoveItem(item.id);
+                        }}
+                        className="text-gray-300 hover:text-red-400 transition-colors p-1 rounded"
+                        aria-label="Remove item"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                          <path
+                            d="M4 4l8 8M12 4l-8 8"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </div>
           ))}
         </div>
-        <Button onClick={handleSave} className="w-full justify-center" disabled={!templateName.trim() || items.length === 0}>
+        <Button
+          onClick={handleSave}
+          className="w-full justify-center"
+          disabled={!templateName.trim() || items.length === 0}
+        >
           Save template ({items.length} items)
         </Button>
       </div>
@@ -320,31 +592,79 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
 
   // ── QUESTION ─────────────────────────────────────────────────────
   const question = questions[step];
+  if (!question) return null;
   const isGroup = question.key === 'group';
   const isDuration = question.key === 'duration';
   const isMulti = question.multiSelect;
   const multiKey = isMulti ? (question.key as MultiKey) : null;
   const selectedMulti = multiKey ? (answers[multiKey] as string[]) : [];
   const needsContinue = isGroup || isMulti;
+  const allOptionsSelected =
+    isMulti &&
+    question.options.length > 0 &&
+    question.options.every((o) => selectedMulti.includes(o.value));
 
   return (
     <div className="p-4 max-w-lg mx-auto">
-      <BackButton label={step === 0 ? 'Templates' : 'Back'} />
+      <BackButton label={step === 0 ? 'Templates' : 'Back'} onClick={handleBack} />
 
       <div className="flex gap-1.5 mb-6">
         {questions.map((_, i) => (
-          <div key={i} className={`h-1 rounded-full flex-1 transition-colors duration-300 ${i <= step ? 'bg-[#2D5016]' : 'bg-gray-200'}`} />
+          <div
+            key={i}
+            className={`h-1 rounded-full flex-1 transition-colors duration-300 ${i <= step ? 'bg-[#2D5016]' : 'bg-gray-200'}`}
+          />
         ))}
       </div>
 
       <h2 className="text-xl font-bold text-gray-900 mb-1">{question.heading}</h2>
-      <p className="text-sm text-gray-500 mb-5">{question.subheading}</p>
+      <div className="flex items-start justify-between gap-4 mb-5">
+        <p className="text-sm text-gray-500">{question.subheading}</p>
+        {isMulti && (
+          <button
+            onClick={() => {
+              const all = question.options.map((o) => o.value);
+              setAnswers((prev) => ({
+                ...prev,
+                [multiKey as MultiKey]: allOptionsSelected ? [] : all,
+              }));
+            }}
+            className="text-xs font-medium text-[#2D5016] hover:underline flex-shrink-0"
+          >
+            {allOptionsSelected ? 'Clear all' : 'Select all'}
+          </button>
+        )}
+      </div>
 
       {isGroup ? (
         <div className="flex flex-col gap-3 mb-5">
-          <StepperRow label="Adults" subtitle="18 years and older" value={answers.group.adults} min={1} onChange={(v) => handleGroupChange('adults', v)} />
-          <StepperRow label="Kids" subtitle="Under 18" value={answers.group.kids} min={0} onChange={(v) => handleGroupChange('kids', v)} />
-          <StepperRow label="Pets" subtitle="Dogs and other animals" value={answers.group.pets} min={0} onChange={(v) => handleGroupChange('pets', v)} />
+          <StepperRow
+            label="Adults"
+            subtitle="18 years and older"
+            value={answers.group.adults}
+            min={1}
+            onChange={(v) => {
+              handleGroupChange('adults', v);
+            }}
+          />
+          <StepperRow
+            label="Kids"
+            subtitle="Under 18"
+            value={answers.group.kids}
+            min={0}
+            onChange={(v) => {
+              handleGroupChange('kids', v);
+            }}
+          />
+          <StepperRow
+            label="Pets"
+            subtitle="Dogs and other animals"
+            value={answers.group.pets}
+            min={0}
+            onChange={(v) => {
+              handleGroupChange('pets', v);
+            }}
+          />
         </div>
       ) : (
         <>
@@ -355,7 +675,9 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                 <input
                   type="date"
                   value={answers.startDate ?? ''}
-                  onChange={(e) => handleDateRange('startDate', e.target.value)}
+                  onChange={(e) => {
+                    handleDateRange('startDate', e.target.value);
+                  }}
                   className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
                 />
               </div>
@@ -365,43 +687,55 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                   type="date"
                   value={answers.endDate ?? ''}
                   min={answers.startDate ?? ''}
-                  onChange={(e) => handleDateRange('endDate', e.target.value)}
+                  onChange={(e) => {
+                    handleDateRange('endDate', e.target.value);
+                  }}
                   className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
                 />
               </div>
             </div>
           )}
           <div className={`grid gap-3 mb-5 ${question.cols === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-          {question.options.map((option) => {
-            const isSelected = isMulti
-              ? selectedMulti.includes(option.value)
-              : answers[question.key as SingleKey] === option.value;
+            {question.options.map((option) => {
+              const isSelected = isMulti
+                ? selectedMulti.includes(option.value)
+                : answers[question.key as SingleKey] === option.value;
 
-            return (
-              <button
-                key={option.value}
-                onClick={() =>
-                  isMulti
-                    ? handleMultiToggle(multiKey!, option.value)
-                    : handleSingleSelect(question.key as SingleKey, option.value)
-                }
-                className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${isSelected ? 'border-[#2D5016] bg-[#F0F4EC]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-              >
-                <div className="w-full flex items-start justify-between mb-2">
-                  <span className="text-2xl">{option.emoji}</span>
-                  {isMulti && isSelected && (
-                    <span className="w-5 h-5 rounded-full bg-[#2D5016] flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                  )}
-                </div>
-                <span className="font-semibold text-gray-900 text-sm leading-tight">{option.label}</span>
-                <span className="text-xs text-gray-500 mt-0.5">{option.description}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    if (isMulti) {
+                      handleMultiToggle(multiKey as MultiKey, option.value);
+                    } else {
+                      handleSingleSelect(question.key as SingleKey, option.value);
+                    }
+                  }}
+                  className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${isSelected ? 'border-[#2D5016] bg-[#F0F4EC]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                >
+                  <div className="w-full flex items-start justify-between mb-2">
+                    <span className="text-2xl">{option.emoji}</span>
+                    {isMulti && isSelected && (
+                      <span className="w-5 h-5 rounded-full bg-[#2D5016] flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                          <path
+                            d="M2 6l3 3 5-5"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-semibold text-gray-900 text-sm leading-tight">
+                    {option.label}
+                  </span>
+                  <span className="text-xs text-gray-500 mt-0.5">{option.description}</span>
+                </button>
+              );
+            })}
           </div>
         </>
       )}
@@ -411,12 +745,20 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
           {isGroup
             ? `Continue — ${answers.group.adults + answers.group.kids} ${answers.group.adults + answers.group.kids === 1 ? 'person' : 'people'}${answers.group.pets > 0 ? ` + ${answers.group.pets} pet${answers.group.pets > 1 ? 's' : ''}` : ''}`
             : question.key === 'vehicleEquipment'
-              ? selectedMulti.length === 0 ? 'Nothing pre-packed — continue' : `Continue (${selectedMulti.length} already packed)`
+              ? selectedMulti.length === 0
+                ? 'Nothing pre-packed — continue'
+                : `Continue (${selectedMulti.length} already packed)`
               : question.key === 'eatingSetup'
-                ? selectedMulti.length === 0 ? 'Continue — eating out only' : `Continue (${selectedMulti.length} meal type${selectedMulti.length === 1 ? '' : 's'})`
+                ? selectedMulti.length === 0
+                  ? 'Continue — eating out only'
+                  : `Continue (${selectedMulti.length} meal type${selectedMulti.length === 1 ? '' : 's'})`
                 : question.key === 'weather'
-                  ? selectedMulti.length === 0 ? 'Skip — not sure yet' : `Continue (${selectedMulti.length} condition${selectedMulti.length === 1 ? '' : 's'})`
-                  : selectedMulti.length === 0 ? 'Skip — no specific activities' : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
+                  ? selectedMulti.length === 0
+                    ? 'Skip — not sure yet'
+                    : `Continue (${selectedMulti.length} condition${selectedMulti.length === 1 ? '' : 's'})`
+                  : selectedMulti.length === 0
+                    ? 'Skip — no specific activities'
+                    : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
         </Button>
       )}
     </div>

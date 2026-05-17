@@ -18,7 +18,9 @@ export function CategoryGroup({ category, items, onToggle, onRemove }: CategoryG
   return (
     <div className="mb-4">
       <button
-        onClick={() => setCollapsed((c) => !c)}
+        onClick={() => {
+          setCollapsed((c) => !c);
+        }}
         className="w-full flex items-center justify-between py-2 px-1 text-left"
       >
         <span className="flex items-center gap-2 font-medium text-sm text-gray-700">
@@ -30,9 +32,16 @@ export function CategoryGroup({ category, items, onToggle, onRemove }: CategoryG
         </span>
         <svg
           className={`w-4 h-4 text-gray-400 transition-transform ${collapsed ? '-rotate-90' : ''}`}
-          viewBox="0 0 16 16" fill="none"
+          viewBox="0 0 16 16"
+          fill="none"
         >
-          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M4 6l4 4 4-4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
 

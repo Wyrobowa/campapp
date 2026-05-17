@@ -13,7 +13,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
   const [category, setCategory] = useState<GearCategory>('other');
   const [quantity, setQuantity] = useState(1);
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     onAdd({ name: name.trim(), category, quantity, packed: false });
@@ -26,7 +26,9 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
       <Input
         label="Item name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          setName(e.target.value);
+        }}
         placeholder="e.g. Sleeping bag"
       />
       <div className="flex gap-3">
@@ -34,11 +36,15 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
           <label className="text-sm font-medium text-gray-700">Category</label>
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value as GearCategory)}
+            onChange={(e) => {
+              setCategory(e.target.value as GearCategory);
+            }}
             className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016] bg-white"
           >
             {CATEGORIES.map((c) => (
-              <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>
+              <option key={c.id} value={c.id}>
+                {c.emoji} {c.label}
+              </option>
             ))}
           </select>
         </div>
@@ -48,12 +54,16 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
             type="number"
             min={1}
             value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            onChange={(e) => {
+              setQuantity(Math.max(1, parseInt(e.target.value) || 1));
+            }}
             className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
           />
         </div>
       </div>
-      <Button type="submit" className="self-end">+ Add</Button>
+      <Button type="submit" className="self-end">
+        + Add
+      </Button>
     </form>
   );
 }

@@ -3,7 +3,7 @@ import { Button } from '../ui/Button';
 
 interface TemplateCardProps {
   template: Template;
-  onUse: () => void;
+  onUse?: () => void;
   onDelete?: () => void;
 }
 
@@ -18,14 +18,18 @@ export function TemplateCard({ template, onUse, onDelete }: TemplateCardProps) {
           </span>
         )}
       </div>
-      {template.description && (
-        <p className="text-xs text-gray-500 mb-3">{template.description}</p>
-      )}
+      {template.description && <p className="text-xs text-gray-500 mb-3">{template.description}</p>}
       <p className="text-xs text-gray-400 mb-4">{template.items.length} items</p>
       <div className="flex gap-2">
-        <Button size="sm" onClick={onUse}>Use template</Button>
+        {onUse && (
+          <Button size="sm" onClick={onUse}>
+            Use template
+          </Button>
+        )}
         {!template.isDefault && onDelete && (
-          <Button size="sm" variant="danger" onClick={onDelete}>Delete</Button>
+          <Button size="sm" variant="danger" onClick={onDelete}>
+            Delete
+          </Button>
         )}
       </div>
     </div>

@@ -10,6 +10,7 @@ export const CATEGORIES: { id: GearCategory; label: string; emoji: string }[] = 
   { id: 'other', label: 'Other', emoji: '📦' },
 ];
 
-export const CATEGORY_MAP = Object.fromEntries(
-  CATEGORIES.map((c) => [c.id, c])
-) as Record<GearCategory, (typeof CATEGORIES)[number]>;
+export const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c])) as Record<
+  GearCategory,
+  (typeof CATEGORIES)[number]
+>;

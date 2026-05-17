@@ -34,21 +34,52 @@ export default function App() {
           }`}
         >
           <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
-            <path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            <path
+              d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
           </svg>
           Trips
         </button>
         <button
-          onClick={() => setPage('templates')}
+          onClick={() => {
+            setPage('templates');
+          }}
           className={`flex-1 flex flex-col items-center py-3 text-xs gap-0.5 transition-colors ${
             page === 'templates' ? 'text-[#2D5016]' : 'text-gray-400'
           }`}
         >
           <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
             <rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-            <rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-            <rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-            <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+            <rect
+              x="11"
+              y="3"
+              width="6"
+              height="6"
+              rx="1"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <rect
+              x="3"
+              y="11"
+              width="6"
+              height="6"
+              rx="1"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <rect
+              x="11"
+              y="11"
+              width="6"
+              height="6"
+              rx="1"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
           </svg>
           Templates
         </button>

@@ -7,7 +7,10 @@ export function useTemplates() {
   const [customTemplates, setCustomTemplates] = useLocalStorage<Template[]>('camp-templates', []);
   const templates = [...DEFAULT_TEMPLATES, ...customTemplates];
 
-  function createTemplate(data: Pick<Template, 'name' | 'description'>, items: Omit<GearItem, 'packed'>[]): Template {
+  function createTemplate(
+    data: Pick<Template, 'name' | 'description'>,
+    items: Omit<GearItem, 'packed'>[]
+  ): Template {
     const template: Template = {
       id: generateId(),
       ...data,
@@ -26,14 +29,19 @@ export function useTemplates() {
   }
 
   function updateTemplate(id: string, patch: Partial<Template>) {
-    setCustomTemplates((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
-    );
+    setCustomTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   }
 
   function deleteTemplate(id: string) {
     setCustomTemplates((prev) => prev.filter((t) => t.id !== id));
   }
 
-  return { templates, customTemplates, createTemplate, createTemplateFromTrip, updateTemplate, deleteTemplate };
+  return {
+    templates,
+    customTemplates,
+    createTemplate,
+    createTemplateFromTrip,
+    updateTemplate,
+    deleteTemplate,
+  };
 }

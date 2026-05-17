@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -17,7 +17,13 @@ const sizes = {
   md: 'px-4 py-2.5 text-sm',
 };
 
-export function Button({ variant = 'primary', size = 'md', className = '', children, ...props }: ButtonProps) {
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  children,
+  ...props
+}: ButtonProps) {
   return (
     <button
       className={`inline-flex items-center gap-1.5 rounded-lg font-medium transition-colors min-h-[44px] ${variants[variant]} ${sizes[size]} ${className}`}

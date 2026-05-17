@@ -16,10 +16,15 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
   const [notes, setNotes] = useState('');
   const [templateId, setTemplateId] = useState('');
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!name.trim() || !date) return;
-    onSubmit({ name: name.trim(), date, notes: notes.trim() || undefined, templateId: templateId || undefined });
+    onSubmit({
+      name: name.trim(),
+      date,
+      notes: notes.trim() || undefined,
+      templateId: templateId || undefined,
+    });
   }
 
   return (
@@ -28,7 +33,9 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
         label="Trip name"
         id="trip-name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          setName(e.target.value);
+        }}
         placeholder="e.g. Mountain hike with friends"
         required
       />
@@ -37,7 +44,9 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
         id="trip-date"
         type="date"
         value={date}
-        onChange={(e) => setDate(e.target.value)}
+        onChange={(e) => {
+          setDate(e.target.value);
+        }}
         required
       />
       <div className="flex flex-col gap-1">
@@ -47,12 +56,16 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
         <select
           id="trip-template"
           value={templateId}
-          onChange={(e) => setTemplateId(e.target.value)}
+          onChange={(e) => {
+            setTemplateId(e.target.value);
+          }}
           className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016] bg-white"
         >
           <option value="">— start from scratch —</option>
           {templates.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
           ))}
         </select>
       </div>
@@ -63,14 +76,18 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
         <textarea
           id="trip-notes"
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(e) => {
+            setNotes(e.target.value);
+          }}
           rows={3}
           placeholder="Campsite, route plan..."
           className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016] resize-none"
         />
       </div>
       <div className="flex gap-3 justify-end pt-2">
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button type="submit">Create trip</Button>
       </div>
     </form>

@@ -5,6 +5,7 @@ An offline-first camping gear planner. Create trips, build packing checklists, a
 ## Features
 
 ### Trips
+
 - Create a trip with a name, date, and optional notes
 - Apply any template to pre-fill the packing list
 - Check items off as you pack
@@ -14,23 +15,25 @@ An offline-first camping gear planner. Create trips, build packing checklists, a
 - Save a trip's list back as a reusable template
 
 ### Templates
+
 - 4 built-in templates: Weekend tent camping, Light hiking, Winter bivouac, Car camping
 - Create custom templates via the guided wizard or by saving from a trip
 - Delete custom templates (built-ins are protected)
 
 ### Template creator wizard
+
 A multi-step questionnaire that generates a tailored gear list. Questions adapt based on previous answers:
 
-| Step | Question | Type |
-|------|----------|------|
-| 1 | Where will you sleep? | Single select |
-| 2 | How will you eat? | Multi-select |
-| 3 | What's already in your vehicle? | Multi-select — only shown for car / van / car-tent |
-| 4 | What will you cook on? | Single select — only shown when stove or freeze-dried is selected and no vehicle stove |
-| 5 | Any planned activities? | Multi-select |
-| 6 | How long is the trip? | Single select |
-| 7 | Who's coming? | Steppers for adults / kids / pets |
-| 8 | What season? | Single select |
+| Step | Question                        | Type                                                                                   |
+| ---- | ------------------------------- | -------------------------------------------------------------------------------------- |
+| 1    | Where will you sleep?           | Single select                                                                          |
+| 2    | How will you eat?               | Multi-select                                                                           |
+| 3    | What's already in your vehicle? | Multi-select — only shown for car / van / car-tent                                     |
+| 4    | What will you cook on?          | Single select — only shown when stove or freeze-dried is selected and no vehicle stove |
+| 5    | Any planned activities?         | Multi-select                                                                           |
+| 6    | How long is the trip?           | Single select                                                                          |
+| 7    | Who's coming?                   | Steppers for adults / kids / pets                                                      |
+| 8    | What season?                    | Single select                                                                          |
 
 After answering, the wizard shows a generated gear list that can be edited (remove items) before saving.
 
@@ -45,21 +48,22 @@ After answering, the wizard shows a generated gear list that can be edited (remo
 **What vehicle equipment suppresses:** Fridge → no cooler; Stove → no stove/fuel question; Inverter → no power bank; Chairs & table → no folding furniture
 
 ### Offline / PWA
+
 - Installable as a native-like app on iOS and Android
 - Works fully offline — all data is stored in `localStorage`
 - Service worker auto-updates via Workbox
 
 ## Tech stack
 
-| Layer | Choice |
-|-------|--------|
-| Framework | React 19 |
-| Language | TypeScript 6 (strict) |
-| Build tool | Vite 8 |
-| Styling | Tailwind CSS v4 |
-| PWA | vite-plugin-pwa + Workbox |
-| Persistence | `localStorage` via custom hook |
-| Routing | Manual state machine (no router library) |
+| Layer       | Choice                                   |
+| ----------- | ---------------------------------------- |
+| Framework   | React 19                                 |
+| Language    | TypeScript 6 (strict)                    |
+| Build tool  | Vite 8                                   |
+| Styling     | Tailwind CSS v4                          |
+| PWA         | vite-plugin-pwa + Workbox                |
+| Persistence | `localStorage` via custom hook           |
+| Routing     | Manual state machine (no router library) |
 
 ## Project structure
 
@@ -107,9 +111,9 @@ src/
 interface GearItem {
   id: string;
   name: string;
-  category: GearCategory;  // 'shelter' | 'sleeping' | 'cooking' | 'clothing' | 'tools' | 'first-aid' | 'other'
+  category: GearCategory; // 'shelter' | 'sleeping' | 'cooking' | 'clothing' | 'tools' | 'first-aid' | 'other'
   quantity: number;
-  packed: boolean;          // only on trip items, not template items
+  packed: boolean; // only on trip items, not template items
 }
 
 interface Template {
@@ -117,13 +121,13 @@ interface Template {
   name: string;
   description?: string;
   items: Omit<GearItem, 'packed'>[];
-  isDefault: boolean;        // true → built-in, cannot be deleted
+  isDefault: boolean; // true → built-in, cannot be deleted
 }
 
 interface Trip {
   id: string;
   name: string;
-  date: string;              // ISO date string
+  date: string; // ISO date string
   templateId?: string;
   items: GearItem[];
   notes?: string;
@@ -133,6 +137,7 @@ interface Trip {
 ```
 
 Data is stored in two `localStorage` keys:
+
 - `camp-trips` — array of `Trip`
 - `camp-templates` — array of custom `Template` (built-ins are hardcoded, never persisted)
 
@@ -156,4 +161,4 @@ npm run lint      # ESLint
 - Functional components with hooks; no class components
 - No routing library — page state is a `useState<Page>` in `App.tsx`
 - No state management library — hooks + prop-drilling only
-- Comments only when the *why* is non-obvious
+- Comments only when the _why_ is non-obvious

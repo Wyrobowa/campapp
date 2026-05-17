@@ -41,7 +41,9 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
 
   function showToast(msg: string) {
     setToast(msg);
-    setTimeout(() => setToast(null), 2500);
+    setTimeout(() => {
+      setToast(null);
+    }, 2500);
   }
 
   function startEdit() {
@@ -63,9 +65,18 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
 
   return (
     <div className="p-4 max-w-lg mx-auto pb-24">
-      <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-4 -ml-1 p-1 rounded">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-4 -ml-1 p-1 rounded"
+      >
         <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-          <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M10 4L6 8l4 4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         Trips
       </button>
@@ -75,18 +86,31 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
           <Input
             label="Trip name"
             value={editName}
-            onChange={(e) => setEditName(e.target.value)}
+            onChange={(e) => {
+              setEditName(e.target.value);
+            }}
             autoFocus
           />
           <Input
             label="Date"
             type="date"
             value={editDate}
-            onChange={(e) => setEditDate(e.target.value)}
+            onChange={(e) => {
+              setEditDate(e.target.value);
+            }}
           />
           <div className="flex gap-2">
-            <Button onClick={handleSaveEdit} disabled={!editName.trim()}>Save</Button>
-            <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit} disabled={!editName.trim()}>
+              Save
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setEditing(false);
+              }}
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       ) : (
@@ -104,7 +128,13 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
             aria-label="Edit trip"
           >
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-              <path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M11 2l3 3-8 8H3v-3l8-8z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -128,21 +158,41 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
           key={cat.id}
           category={cat.id}
           items={itemsByCategory[cat.id]}
-          onToggle={(itemId) => toggleItem(trip.id, itemId)}
-          onRemove={(itemId) => removeItem(trip.id, itemId)}
+          onToggle={(itemId) => {
+            toggleItem(trip.id, itemId);
+          }}
+          onRemove={(itemId) => {
+            removeItem(trip.id, itemId);
+          }}
         />
       ))}
 
       <div className="mt-4">
         {showAddForm ? (
           <div className="mb-4">
-            <AddItemForm onAdd={(item) => { addItem(trip.id, item); setShowAddForm(false); }} />
-            <button onClick={() => setShowAddForm(false)} className="mt-2 text-sm text-gray-400 hover:text-gray-600 w-full text-center py-1">
+            <AddItemForm
+              onAdd={(item) => {
+                addItem(trip.id, item);
+                setShowAddForm(false);
+              }}
+            />
+            <button
+              onClick={() => {
+                setShowAddForm(false);
+              }}
+              className="mt-2 text-sm text-gray-400 hover:text-gray-600 w-full text-center py-1"
+            >
               Cancel
             </button>
           </div>
         ) : (
-          <Button variant="secondary" className="w-full justify-center" onClick={() => setShowAddForm(true)}>
+          <Button
+            variant="secondary"
+            className="w-full justify-center"
+            onClick={() => {
+              setShowAddForm(true);
+            }}
+          >
             + Add item
           </Button>
         )}
@@ -150,7 +200,12 @@ export function TripDetail({ trip: initialTrip, onBack }: TripDetailProps) {
 
       {trip.items.length > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <Button variant="ghost" size="sm" onClick={handleSaveAsTemplate} className="text-gray-500">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSaveAsTemplate}
+            className="text-gray-500"
+          >
             Save as template
           </Button>
         </div>

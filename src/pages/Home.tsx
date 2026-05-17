@@ -31,7 +31,13 @@ export function Home({ onSelectTrip }: HomeProps) {
           <p className="text-sm text-gray-500">Your trips</p>
         </div>
         {!showForm && (
-          <Button onClick={() => setShowForm(true)}>+ New trip</Button>
+          <Button
+            onClick={() => {
+              setShowForm(true);
+            }}
+          >
+            + New trip
+          </Button>
         )}
       </div>
 
@@ -41,7 +47,9 @@ export function Home({ onSelectTrip }: HomeProps) {
           <TripForm
             templates={templates}
             onSubmit={handleCreate}
-            onCancel={() => setShowForm(false)}
+            onCancel={() => {
+              setShowForm(false);
+            }}
           />
         </div>
       )}
@@ -57,8 +65,12 @@ export function Home({ onSelectTrip }: HomeProps) {
             <TripCard
               key={trip.id}
               trip={trip}
-              onClick={() => onSelectTrip(trip)}
-              onDelete={() => deleteTrip(trip.id)}
+              onClick={() => {
+                onSelectTrip(trip);
+              }}
+              onDelete={() => {
+                deleteTrip(trip.id);
+              }}
             />
           ))}
         </div>

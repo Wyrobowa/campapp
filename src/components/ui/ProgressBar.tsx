@@ -8,7 +8,9 @@ export function ProgressBar({ packed, total }: ProgressBarProps) {
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs text-gray-500">
-        <span>{packed}/{total} packed</span>
+        <span>
+          {packed}/{total} packed
+        </span>
         <span>{pct}%</span>
       </div>
       <div className="h-2 rounded-full bg-gray-200 overflow-hidden">

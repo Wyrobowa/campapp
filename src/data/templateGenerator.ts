@@ -2,12 +2,51 @@ import type { GearCategory } from '../types';
 import { generateId } from '../utils/id';
 
 export type SleepSetup = 'tent' | 'car' | 'car-tent' | 'van';
-export type EatingSetup = 'stove' | 'campfire' | 'bbq' | 'cold-food' | 'freeze-dried' | 'restaurants';
+export type EatingSetup =
+  | 'stove'
+  | 'campfire'
+  | 'bbq'
+  | 'cold-food'
+  | 'freeze-dried'
+  | 'restaurants';
 export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
-export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table' | 'lighting' | 'first-aid-kit' | 'awning' | 'water-tank' | 'cookware' | 'multi-tool' | 'navigation' | 'roof-box';
-export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling' | 'trail-running' | 'photography' | 'yoga' | 'stargazing' | 'surfing';
+export type VehicleEquipment =
+  | 'fridge'
+  | 'stove'
+  | 'inverter'
+  | 'chairs-table'
+  | 'lighting'
+  | 'first-aid-kit'
+  | 'awning'
+  | 'water-tank'
+  | 'cookware'
+  | 'multi-tool'
+  | 'navigation'
+  | 'roof-box';
+export type Activity =
+  | 'hiking'
+  | 'swimming'
+  | 'cycling'
+  | 'climbing'
+  | 'fishing'
+  | 'paddling'
+  | 'trail-running'
+  | 'photography'
+  | 'yoga'
+  | 'stargazing'
+  | 'surfing';
 export type Duration = 'day' | 'short' | 'medium' | 'long';
-export type WeatherCondition = 'cold' | 'cold-nights' | 'snow' | 'rain' | 'wind' | 'extreme-heat' | 'high-uv' | 'humid';
+export type WeatherCondition =
+  | 'cold'
+  | 'cold-nights'
+  | 'snow'
+  | 'rain'
+  | 'wind'
+  | 'extreme-heat'
+  | 'high-uv'
+  | 'humid';
+
+export type TentCapacity = '1' | '2' | '3' | '4';
 
 export interface GroupComposition {
   adults: number;
@@ -17,6 +56,7 @@ export interface GroupComposition {
 
 export interface CreatorAnswers {
   sleepSetup: SleepSetup;
+  tentCapacity?: TentCapacity;
   eatingSetup: EatingSetup[];
   fuelSource?: FuelSource;
   vehicleEquipment: VehicleEquipment[];
@@ -50,33 +90,57 @@ export function generateTemplateName(answers: CreatorAnswers): string {
   const { sleepSetup, duration, weather, activities, group } = answers;
 
   const sleepLabel: Record<SleepSetup, string> = {
-    tent: 'tent camping', car: 'car camping', 'car-tent': 'car tent camping', van: 'van trip',
+    tent: 'tent camping',
+    car: 'car camping',
+    'car-tent': 'car tent camping',
+    van: 'van trip',
   };
   const durationLabel: Record<Duration, string> = {
-    day: 'Day trip', short: '1–2 night', medium: '3–5 night', long: 'Week-long',
+    day: 'Day trip',
+    short: '1–2 night',
+    medium: '3–5 night',
+    long: 'Week-long',
   };
   const activityLabel: Record<Activity, string> = {
-    hiking: 'hiking', swimming: 'swimming', cycling: 'cycling',
-    climbing: 'climbing', fishing: 'fishing', paddling: 'paddling',
-    'trail-running': 'trail running', photography: 'photography',
-    yoga: 'yoga', stargazing: 'stargazing', surfing: 'surfing',
+    hiking: 'hiking',
+    swimming: 'swimming',
+    cycling: 'cycling',
+    climbing: 'climbing',
+    fishing: 'fishing',
+    paddling: 'paddling',
+    'trail-running': 'trail running',
+    photography: 'photography',
+    yoga: 'yoga',
+    stargazing: 'stargazing',
+    surfing: 'surfing',
   };
 
-  const weatherLabel = weather.includes('snow') ? 'winter'
-    : weather.includes('cold') ? 'cold-weather'
-    : weather.includes('extreme-heat') ? 'summer heat'
-    : weather.includes('rain') ? 'rainy'
-    : 'fair-weather';
+  const weatherLabel = weather.includes('snow')
+    ? 'winter'
+    : weather.includes('cold')
+      ? 'cold-weather'
+      : weather.includes('extreme-heat')
+        ? 'summer heat'
+        : weather.includes('rain')
+          ? 'rainy'
+          : 'fair-weather';
 
-  const activityStr = activities.length > 0
-    ? ` + ${activities.slice(0, 2).map((a) => activityLabel[a]).join(' & ')}`
-    : '';
+  const activityStr =
+    activities.length > 0
+      ? ` + ${activities
+          .slice(0, 2)
+          .map((a) => activityLabel[a])
+          .join(' & ')}`
+      : '';
   const groupStr = formatGroupStr(group);
   const groupSuffix = groupStr !== 'solo' ? ` (${groupStr})` : '';
 
   if (duration === 'day') {
     return activities.length > 0
-      ? `Day trip — ${activities.slice(0, 2).map((a) => activityLabel[a]).join(' & ')}${groupSuffix}`
+      ? `Day trip — ${activities
+          .slice(0, 2)
+          .map((a) => activityLabel[a])
+          .join(' & ')}${groupSuffix}`
       : `Day trip${groupSuffix}`;
   }
 
@@ -84,7 +148,19 @@ export function generateTemplateName(answers: CreatorAnswers): string {
 }
 
 export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
-  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, startDate, endDate, group, weather } = answers;
+  const {
+    sleepSetup,
+    tentCapacity,
+    eatingSetup,
+    fuelSource,
+    vehicleEquipment,
+    activities,
+    duration,
+    startDate,
+    endDate,
+    group,
+    weather,
+  } = answers;
 
   const adults = group.adults;
   const kids = group.kids;
@@ -95,8 +171,17 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
 
   const nights =
     startDate && endDate
-      ? Math.max(0, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000))
-      : duration === 'day' ? 0 : duration === 'short' ? 2 : duration === 'medium' ? 4 : 8;
+      ? Math.max(
+          0,
+          Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000)
+        )
+      : duration === 'day'
+        ? 0
+        : duration === 'short'
+          ? 2
+          : duration === 'medium'
+            ? 4
+            : 8;
 
   const overnight = nights > 0;
   const isLong = nights >= 3;
@@ -112,6 +197,9 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   const highUV = weather.includes('high-uv');
 
   const isVehicleSleep = sleepSetup === 'car' || sleepSetup === 'van' || sleepSetup === 'car-tent';
+  const capacityMap: Record<TentCapacity, number> = { '1': 1, '2': 2, '3': 3, '4': 4 };
+  const tentCap = tentCapacity ? capacityMap[tentCapacity] : 2;
+  const tentsNeeded = sleepSetup === 'tent' ? Math.ceil(adults / tentCap) : 1;
   const vHasFridge = vehicleEquipment.includes('fridge');
   const vHasStove = vehicleEquipment.includes('stove');
   const vHasInverter = vehicleEquipment.includes('inverter');
@@ -136,24 +224,57 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   // ── SHELTER & SLEEPING ───────────────────────────────────────────
   if (overnight) {
     if (sleepSetup === 'tent') {
-      raw.push({ name: hasSnow ? '4-season tent' : 'Tent', category: 'shelter', quantity: 1 });
-      raw.push({ name: 'Tent pegs', category: 'shelter', quantity: expectsWind ? 12 : 6 });
-      raw.push({ name: hasSnow ? 'Winter sleeping bag (-20°C)' : isCold ? '3-season sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
-      raw.push({ name: hasSnow ? 'Insulating mat' : 'Self-inflating sleeping mat', category: 'sleeping', quantity: adults });
+      raw.push({
+        name: hasSnow ? '4-season tent' : 'Tent',
+        category: 'shelter',
+        quantity: tentsNeeded,
+      });
+      raw.push({
+        name: 'Tent pegs',
+        category: 'shelter',
+        quantity: (expectsWind ? 12 : 6) * tentsNeeded,
+      });
+      raw.push({
+        name: hasSnow
+          ? 'Winter sleeping bag (-20°C)'
+          : isCold
+            ? '3-season sleeping bag'
+            : 'Sleeping bag',
+        category: 'sleeping',
+        quantity: adults,
+      });
+      raw.push({
+        name: hasSnow ? 'Insulating mat' : 'Self-inflating sleeping mat',
+        category: 'sleeping',
+        quantity: adults,
+      });
       if (!hasSnow) raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
     } else if (sleepSetup === 'car') {
-      raw.push({ name: hasSnow ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({
+        name: hasSnow ? 'Winter sleeping bag' : 'Sleeping bag',
+        category: 'sleeping',
+        quantity: adults,
+      });
       raw.push({ name: 'Blanket', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Window sun shades', category: 'sleeping', quantity: 1 });
     } else if (sleepSetup === 'car-tent') {
       raw.push({ name: 'Car / roof tent', category: 'shelter', quantity: 1 });
-      raw.push({ name: hasSnow ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({
+        name: hasSnow ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag',
+        category: 'sleeping',
+        quantity: adults,
+      });
       raw.push({ name: 'Sleeping mat', category: 'sleeping', quantity: adults });
-    } else if (sleepSetup === 'van') {
-      raw.push({ name: hasSnow ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+    } else {
+      raw.push({
+        name: hasSnow ? 'Winter sleeping bag' : 'Sleeping bag',
+        category: 'sleeping',
+        quantity: adults,
+      });
       raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
-      if (!hasSnow) raw.push({ name: 'Lightweight blanket', category: 'sleeping', quantity: adults });
+      if (!hasSnow)
+        raw.push({ name: 'Lightweight blanket', category: 'sleeping', quantity: adults });
     }
     if (hasSnow && sleepSetup !== 'car') {
       raw.push({ name: 'Mat underlay', category: 'sleeping', quantity: adults });
@@ -162,7 +283,11 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
       raw.push({ name: 'Sleeping bag liner', category: 'sleeping', quantity: adults });
     }
     if (hasKids) {
-      raw.push({ name: hasSnow ? "Kids' winter sleeping bag" : "Kids' sleeping bag", category: 'sleeping', quantity: kids });
+      raw.push({
+        name: hasSnow ? "Kids' winter sleeping bag" : "Kids' sleeping bag",
+        category: 'sleeping',
+        quantity: kids,
+      });
       raw.push({ name: "Kids' sleeping mat", category: 'sleeping', quantity: kids });
     }
   }
@@ -172,14 +297,27 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   if (needsHotWater && !vHasStove) {
     const fuel = fuelSource ?? 'gas';
     if (fuel === 'gas') {
-      raw.push({ name: hasSnow ? 'Cold-weather gas stove' : 'Gas stove', category: 'cooking', quantity: 1 });
-      raw.push({ name: hasSnow ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 2.5)) });
+      raw.push({
+        name: hasSnow ? 'Cold-weather gas stove' : 'Gas stove',
+        category: 'cooking',
+        quantity: 1,
+      });
+      raw.push({
+        name: hasSnow ? 'Winter gas canister' : 'Gas canister',
+        category: 'cooking',
+        quantity: Math.max(1, Math.ceil(nights / 2.5)),
+      });
     } else if (fuel === 'alcohol') {
       raw.push({ name: 'Alcohol stove', category: 'cooking', quantity: 1 });
-      raw.push({ name: 'Alcohol fuel bottle', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 4)) });
+      raw.push({
+        name: 'Alcohol fuel bottle',
+        category: 'cooking',
+        quantity: Math.max(1, Math.ceil(nights / 4)),
+      });
     } else if (fuel === 'electric') {
       raw.push({ name: 'Portable induction cooktop', category: 'cooking', quantity: 1 });
-      if (!vHasInverter) raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
+      if (!vHasInverter)
+        raw.push({ name: 'Portable power station', category: 'tools', quantity: 1 });
     }
   }
 
@@ -198,7 +336,8 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
 
   if (hasColdFood) {
     if (!vHasFridge) raw.push({ name: 'Camping cooler', category: 'cooking', quantity: 1 });
-    if (!vHasMultiTool && !vHasCookware) raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
+    if (!vHasMultiTool && !vHasCookware)
+      raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
   }
 
   if (hasRealCooking) {
@@ -258,13 +397,15 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
 
   // ── TOOLS ────────────────────────────────────────────────────────
   raw.push({ name: 'Headlamp', category: 'tools', quantity: ppl });
-  if (overnight && !vHasMultiTool) raw.push({ name: 'Pocket knife', category: 'tools', quantity: 1 });
+  if (overnight && !vHasMultiTool)
+    raw.push({ name: 'Pocket knife', category: 'tools', quantity: 1 });
 
   const usingElectric = fuelSource === 'electric';
   if ((isLong || sleepSetup === 'van') && !vHasInverter && !usingElectric) {
     raw.push({ name: 'Power bank', category: 'tools', quantity: isLargeGroup ? 2 : 1 });
   }
-  if (isVehicleSleep && !vHasLighting) raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
+  if (isVehicleSleep && !vHasLighting)
+    raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
   if (hasSnow) {
     raw.push({ name: 'Crampons / microspikes', category: 'tools', quantity: adults });
     raw.push({ name: 'Snow shovel', category: 'tools', quantity: 1 });

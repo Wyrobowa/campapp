@@ -7,6 +7,6 @@ export function storageGet<T>(key: string, fallback: T): T {
   }
 }
 
-export function storageSet<T>(key: string, value: T): void {
+export function storageSet(key: string, value: unknown): void {
   localStorage.setItem(key, JSON.stringify(value));
 }

@@ -18,7 +18,9 @@ export function Templates() {
     return (
       <TemplateCreator
         onSave={handleSave}
-        onCancel={() => setShowCreator(false)}
+        onCancel={() => {
+          setShowCreator(false);
+        }}
       />
     );
   }
@@ -30,7 +32,13 @@ export function Templates() {
           <h1 className="text-2xl font-bold text-[#2D5016]">Templates</h1>
           <p className="text-sm text-gray-500">Ready-made gear lists</p>
         </div>
-        <Button onClick={() => setShowCreator(true)}>+ New template</Button>
+        <Button
+          onClick={() => {
+            setShowCreator(true);
+          }}
+        >
+          + New template
+        </Button>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -38,8 +46,13 @@ export function Templates() {
           <TemplateCard
             key={template.id}
             template={template}
-            onUse={() => {}}
-            onDelete={!template.isDefault ? () => deleteTemplate(template.id) : undefined}
+            onDelete={
+              !template.isDefault
+                ? () => {
+                    deleteTemplate(template.id);
+                  }
+                : undefined
+            }
           />
         ))}
       </div>

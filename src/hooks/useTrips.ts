@@ -5,7 +5,10 @@ import type { Trip, GearItem } from '../types';
 export function useTrips() {
   const [trips, setTrips] = useLocalStorage<Trip[]>('camp-trips', []);
 
-  function createTrip(data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>, items: Omit<GearItem, 'packed'>[]): Trip {
+  function createTrip(
+    data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>,
+    items: Omit<GearItem, 'packed'>[]
+  ): Trip {
     const now = new Date().toISOString();
     const trip: Trip = {
       id: generateId(),
@@ -20,9 +23,7 @@ export function useTrips() {
 
   function updateTrip(id: string, patch: Partial<Trip>) {
     setTrips((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t
-      )
+      prev.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t))
     );
   }
 
