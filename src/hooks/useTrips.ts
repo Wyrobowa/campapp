@@ -1,9 +1,10 @@
 import { useLocalStorage } from './useLocalStorage';
 import { generateId } from '../utils/id';
+import { TripArraySchema } from '../schemas';
 import type { Trip, GearItem } from '../types';
 
 export function useTrips() {
-  const [trips, setTrips] = useLocalStorage<Trip[]>('camp-trips', []);
+  const [trips, setTrips] = useLocalStorage('camp-trips', TripArraySchema, []);
 
   function createTrip(
     data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>,

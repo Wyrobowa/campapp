@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { storageGet, storageSet } from '../utils/storage';
+import type { z } from 'zod';
+import { storageParse, storageSet } from '../utils/storage';
 
-export function useLocalStorage<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(() => storageGet(key, initial));
+export function useLocalStorage<T>(key: string, schema: z.ZodType<T>, initial: T) {
+  const [value, setValue] = useState<T>(() => storageParse(key, schema, initial));
 
   const set = useCallback(
     (next: T | ((prev: T) => T)) => {

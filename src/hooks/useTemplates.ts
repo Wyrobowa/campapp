@@ -1,10 +1,15 @@
 import { useLocalStorage } from './useLocalStorage';
 import { generateId } from '../utils/id';
 import { DEFAULT_TEMPLATES } from '../data/defaultTemplates';
+import { TemplateArraySchema } from '../schemas';
 import type { Template, GearItem, Trip } from '../types';
 
 export function useTemplates() {
-  const [customTemplates, setCustomTemplates] = useLocalStorage<Template[]>('camp-templates', []);
+  const [customTemplates, setCustomTemplates] = useLocalStorage(
+    'camp-templates',
+    TemplateArraySchema,
+    []
+  );
   const templates = [...DEFAULT_TEMPLATES, ...customTemplates];
 
   function createTemplate(
