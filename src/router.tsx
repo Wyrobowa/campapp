@@ -1,27 +1,38 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
 import { RootLayout } from './components/layout/RootLayout';
-import { Home } from './pages/Home';
-import { TripDetail } from './pages/TripDetail';
-import { Templates } from './pages/Templates';
+import { PageSuspense } from './components/ui/PageSuspense';
+import { LazyHome, LazyTripDetail, LazyTemplates } from './pages/lazy';
 
 const rootRoute = createRootRoute({ component: RootLayout });
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: Home,
+  component: () => (
+    <PageSuspense>
+      <LazyHome />
+    </PageSuspense>
+  ),
 });
 
 const tripRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/trips/$tripId',
-  component: TripDetail,
+  component: () => (
+    <PageSuspense>
+      <LazyTripDetail />
+    </PageSuspense>
+  ),
 });
 
 const templatesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/templates',
-  component: Templates,
+  component: () => (
+    <PageSuspense>
+      <LazyTemplates />
+    </PageSuspense>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([homeRoute, tripRoute, templatesRoute]);
