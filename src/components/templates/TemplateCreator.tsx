@@ -449,29 +449,29 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
   const questions = computeQuestions(answers);
   const isReview = step >= questions.length;
 
-  function goToReview(final: PartialAnswers) {
+  const goToReview = (final: PartialAnswers) => {
     const full = final as CreatorAnswers;
     setItems(generateItems(full));
     setTemplateName(generateTemplateName(full));
     setStep(questions.length);
-  }
+  };
 
-  function advance(nextAnswers: PartialAnswers) {
+  const advance = (nextAnswers: PartialAnswers) => {
     const nextQuestions = computeQuestions(nextAnswers);
     if (step < nextQuestions.length - 1) {
       setStep((s) => s + 1);
     } else {
       goToReview(nextAnswers);
     }
-  }
+  };
 
-  function handleSingleSelect(key: SingleKey, value: string) {
+  const handleSingleSelect = (key: SingleKey, value: string) => {
     const next = { ...answers, [key]: value };
     setAnswers(next);
     advance(next);
-  }
+  };
 
-  function handleMultiToggle(key: MultiKey, value: string) {
+  const handleMultiToggle = (key: MultiKey, value: string) => {
     setAnswers((prev) => {
       const current = prev[key] as string[];
       const updated = current.includes(value)
@@ -479,13 +479,13 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
         : [...current, value];
       return { ...prev, [key]: updated };
     });
-  }
+  };
 
-  function handleGroupChange(field: keyof GroupComposition, value: number) {
+  const handleGroupChange = (field: keyof GroupComposition, value: number) => {
     setAnswers((prev) => ({ ...prev, group: { ...prev.group, [field]: value } }));
-  }
+  };
 
-  function handleDateRange(field: 'startDate' | 'endDate', value: string) {
+  const handleDateRange = (field: 'startDate' | 'endDate', value: string) => {
     setAnswers((prev) => {
       const next = { ...prev, [field]: value };
       const start = next.startDate ?? '';
@@ -497,26 +497,26 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
       }
       return next;
     });
-  }
+  };
 
-  function handleContinue() {
+  const handleContinue = () => {
     advance(answers);
-  }
+  };
 
-  function handleBack() {
+  const handleBack = () => {
     if (step === 0) onCancel();
     else if (isReview) setStep(questions.length - 1);
     else setStep((s) => s - 1);
-  }
+  };
 
-  function handleRemoveItem(id: string) {
+  const handleRemoveItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
-  }
+  };
 
-  function handleSave() {
+  const handleSave = () => {
     if (!templateName.trim() || items.length === 0) return;
     onSave(templateName.trim(), items);
-  }
+  };
 
   // ── REVIEW ───────────────────────────────────────────────────────
   if (isReview) {

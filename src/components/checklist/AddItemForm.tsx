@@ -13,13 +13,13 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
   const [category, setCategory] = useState<GearCategory>('other');
   const [quantity, setQuantity] = useState(1);
 
-  function handleSubmit(e: React.SyntheticEvent) {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     onAdd({ name: name.trim(), category, quantity, packed: false });
     setName('');
     setQuantity(1);
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-4 bg-surface rounded-xl">

@@ -36,17 +36,17 @@ function TripDetailView({ trip }: { trip: Trip }) {
 
   const categoriesWithItems = CATEGORIES.filter((c) => itemsByCategory[c.id].length > 0);
 
-  function showToast(msg: string) {
+  const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => {
       setToast(null);
     }, 2500);
-  }
+  };
 
-  function handleSaveAsTemplate() {
+  const handleSaveAsTemplate = () => {
     createTemplateFromTrip(trip);
     showToast('Template saved!');
-  }
+  };
 
   return (
     <div className="p-4 max-w-lg mx-auto pb-24">

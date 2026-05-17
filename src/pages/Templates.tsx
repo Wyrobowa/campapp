@@ -9,10 +9,10 @@ export function Templates() {
   const { templates, deleteTemplate, createTemplate } = useTemplates();
   const [showCreator, setShowCreator] = useState(false);
 
-  function handleSave(name: string, items: GeneratedItem[]) {
+  const handleSave = (name: string, items: GeneratedItem[]) => {
     createTemplate({ name }, items);
     setShowCreator(false);
-  }
+  };
 
   if (showCreator) {
     return (

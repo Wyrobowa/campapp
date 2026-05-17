@@ -8,21 +8,21 @@ export function useEditableTrip(trip: Trip) {
   const [editName, setEditName] = useState('');
   const [editDate, setEditDate] = useState('');
 
-  function startEdit() {
+  const startEdit = () => {
     setEditName(trip.name);
     setEditDate(trip.date);
     setEditing(true);
-  }
+  };
 
-  function cancelEdit() {
+  const cancelEdit = () => {
     setEditing(false);
-  }
+  };
 
-  function saveEdit() {
+  const saveEdit = () => {
     if (!editName.trim()) return;
     updateTrip(trip.id, { name: editName.trim(), date: editDate });
     setEditing(false);
-  }
+  };
 
   return { editing, editName, editDate, setEditName, setEditDate, startEdit, cancelEdit, saveEdit };
 }

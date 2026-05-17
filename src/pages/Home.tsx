@@ -12,12 +12,12 @@ export function Home() {
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
 
-  function handleCreate(data: Parameters<typeof createTrip>[0]) {
+  const handleCreate = (data: Parameters<typeof createTrip>[0]) => {
     const template = templates.find((t) => t.id === data.templateId);
     const trip = createTrip(data, template ? template.items : []);
     setShowForm(false);
     void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
-  }
+  };
 
   return (
     <div className="p-4 max-w-lg mx-auto">

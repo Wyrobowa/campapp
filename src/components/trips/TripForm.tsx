@@ -16,7 +16,7 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
   const [notes, setNotes] = useState('');
   const [templateId, setTemplateId] = useState('');
 
-  function handleSubmit(e: React.SyntheticEvent) {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!name.trim() || !date) return;
     onSubmit({
@@ -25,7 +25,7 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
       notes: notes.trim() || undefined,
       templateId: templateId || undefined,
     });
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
