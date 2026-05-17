@@ -34,7 +34,7 @@ export function ChecklistItem({ item, onToggle, onRemove }: ChecklistItemProps) 
 
       <button
         onClick={() => onRemove(item.id)}
-        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1 rounded"
+        className="text-gray-300 hover:text-red-500 active:text-red-500 transition-colors p-1 rounded flex-shrink-0"
         aria-label="Remove item"
       >
         <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
