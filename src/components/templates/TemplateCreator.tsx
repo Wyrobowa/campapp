@@ -177,6 +177,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
     eatingSetup: [],
     group: { adults: 1, kids: 0, pets: 0 },
   });
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [templateName, setTemplateName] = useState('');
   const [items, setItems] = useState<GeneratedItem[]>([]);
 
@@ -217,6 +218,19 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
 
   function handleGroupChange(field: keyof GroupComposition, value: number) {
     setAnswers((prev) => ({ ...prev, group: { ...prev.group, [field]: value } }));
+  }
+
+  function handleDateRange(field: 'start' | 'end', value: string) {
+    const next = { ...dateRange, [field]: value };
+    setDateRange(next);
+    if (next.start && next.end && next.end >= next.start) {
+      const nights = Math.round(
+        (new Date(next.end).getTime() - new Date(next.start).getTime()) / 86400000
+      );
+      const duration: Duration =
+        nights <= 0 ? 'day' : nights <= 2 ? 'short' : nights <= 5 ? 'medium' : 'long';
+      setAnswers((prev) => ({ ...prev, duration }));
+    }
   }
 
   function handleContinue() {
@@ -290,6 +304,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
   // ── QUESTION ─────────────────────────────────────────────────────
   const question = questions[step];
   const isGroup = question.key === 'group';
+  const isDuration = question.key === 'duration';
   const isMulti = question.multiSelect;
   const multiKey = isMulti ? (question.key as MultiKey) : null;
   const selectedMulti = multiKey ? (answers[multiKey] as string[]) : [];
@@ -315,7 +330,31 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
           <StepperRow label="Pets" subtitle="Dogs and other animals" value={answers.group.pets} min={0} onChange={(v) => handleGroupChange('pets', v)} />
         </div>
       ) : (
-        <div className={`grid gap-3 mb-5 ${question.cols === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <>
+          {isDuration && (
+            <div className="flex gap-3 mb-4">
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">Start date</label>
+                <input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={(e) => handleDateRange('start', e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
+                />
+              </div>
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">End date</label>
+                <input
+                  type="date"
+                  value={dateRange.end}
+                  min={dateRange.start}
+                  onChange={(e) => handleDateRange('end', e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2D5016] focus:outline-none focus:ring-1 focus:ring-[#2D5016]"
+                />
+              </div>
+            </div>
+          )}
+          <div className={`grid gap-3 mb-5 ${question.cols === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {question.options.map((option) => {
             const isSelected = isMulti
               ? selectedMulti.includes(option.value)
@@ -346,7 +385,8 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
               </button>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
 
       {needsContinue && (
