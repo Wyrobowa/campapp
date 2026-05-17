@@ -29,11 +29,23 @@ export function TripDetail() {
 
   useEffect(() => {
     if (!tripOrUndef) {
-      void navigate({ to: '/' });
+      const timer = setTimeout(() => {
+        void navigate({ to: '/' });
+      }, 1500);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [tripOrUndef, navigate]);
 
-  if (!tripOrUndef) return null;
+  if (!tripOrUndef) {
+    return (
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center gap-2 text-center p-6">
+        <p className="text-3xl">🔍</p>
+        <p className="text-sm text-gray-500">Trip not found — taking you home…</p>
+      </div>
+    );
+  }
   // Const rebinding after the guard so closures (startEdit etc.) see Trip, not Trip | undefined
   const trip = tripOrUndef;
 
