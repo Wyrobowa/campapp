@@ -7,7 +7,7 @@ export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
 export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table' | 'lighting' | 'first-aid-kit' | 'awning' | 'water-tank';
 export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling' | 'trail-running' | 'photography' | 'yoga' | 'stargazing' | 'surfing';
 export type Duration = 'day' | 'short' | 'medium' | 'long';
-export type Season = 'summer' | 'shoulder' | 'winter';
+export type WeatherCondition = 'cold' | 'cold-nights' | 'snow' | 'rain' | 'wind' | 'extreme-heat' | 'high-uv' | 'humid';
 
 export interface GroupComposition {
   adults: number;
@@ -25,7 +25,7 @@ export interface CreatorAnswers {
   startDate?: string;
   endDate?: string;
   group: GroupComposition;
-  season: Season;
+  weather: WeatherCondition[];
 }
 
 export interface GeneratedItem {
@@ -47,7 +47,7 @@ function formatGroupStr(group: GroupComposition): string {
 }
 
 export function generateTemplateName(answers: CreatorAnswers): string {
-  const { sleepSetup, duration, season, activities, group } = answers;
+  const { sleepSetup, duration, weather, activities, group } = answers;
 
   const sleepLabel: Record<SleepSetup, string> = {
     tent: 'tent camping', car: 'car camping', 'car-tent': 'car tent camping', van: 'van trip',
@@ -55,15 +55,18 @@ export function generateTemplateName(answers: CreatorAnswers): string {
   const durationLabel: Record<Duration, string> = {
     day: 'Day trip', short: '1–2 night', medium: '3–5 night', long: 'Week-long',
   };
-  const seasonLabel: Record<Season, string> = {
-    summer: 'summer', shoulder: 'spring/autumn', winter: 'winter',
-  };
   const activityLabel: Record<Activity, string> = {
     hiking: 'hiking', swimming: 'swimming', cycling: 'cycling',
     climbing: 'climbing', fishing: 'fishing', paddling: 'paddling',
     'trail-running': 'trail running', photography: 'photography',
     yoga: 'yoga', stargazing: 'stargazing', surfing: 'surfing',
   };
+
+  const weatherLabel = weather.includes('snow') ? 'winter'
+    : weather.includes('cold') ? 'cold-weather'
+    : weather.includes('extreme-heat') ? 'summer heat'
+    : weather.includes('rain') ? 'rainy'
+    : 'fair-weather';
 
   const activityStr = activities.length > 0
     ? ` + ${activities.slice(0, 2).map((a) => activityLabel[a]).join(' & ')}`
@@ -77,11 +80,11 @@ export function generateTemplateName(answers: CreatorAnswers): string {
       : `Day trip${groupSuffix}`;
   }
 
-  return `${durationLabel[duration]} ${seasonLabel[season]} ${sleepLabel[sleepSetup]}${activityStr}${groupSuffix}`;
+  return `${durationLabel[duration]} ${weatherLabel} ${sleepLabel[sleepSetup]}${activityStr}${groupSuffix}`;
 }
 
 export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
-  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, startDate, endDate, group, season } = answers;
+  const { sleepSetup, eatingSetup, fuelSource, vehicleEquipment, activities, duration, startDate, endDate, group, weather } = answers;
 
   const adults = group.adults;
   const kids = group.kids;
@@ -96,11 +99,17 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
       : duration === 'day' ? 0 : duration === 'short' ? 2 : duration === 'medium' ? 4 : 8;
 
   const overnight = nights > 0;
-  const isWinter = season === 'winter';
-  const isCold = season !== 'summer';
   const isLong = nights >= 3;
   const isLargeGroup = ppl >= 6;
   const socks = Math.min(Math.max(3, nights + 1), 10);
+
+  const hasSnow = weather.includes('snow');
+  const isCold = hasSnow || weather.includes('cold') || weather.includes('cold-nights');
+  const hasColdNights = weather.includes('cold-nights');
+  const expectsRain = weather.includes('rain');
+  const expectsWind = weather.includes('wind');
+  const isHot = weather.includes('extreme-heat');
+  const highUV = weather.includes('high-uv');
 
   const isVehicleSleep = sleepSetup === 'car' || sleepSetup === 'van' || sleepSetup === 'car-tent';
   const vHasFridge = vehicleEquipment.includes('fridge');
@@ -124,42 +133,44 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   // ── SHELTER & SLEEPING ───────────────────────────────────────────
   if (overnight) {
     if (sleepSetup === 'tent') {
-      raw.push({ name: isWinter ? '4-season tent' : 'Tent', category: 'shelter', quantity: 1 });
-      raw.push({ name: 'Tent pegs', category: 'shelter', quantity: 6 });
-      raw.push({ name: isWinter ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: adults });
-      raw.push({ name: isWinter ? 'Insulating mat' : 'Self-inflating sleeping mat', category: 'sleeping', quantity: adults });
-      if (!isWinter) raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
+      raw.push({ name: hasSnow ? '4-season tent' : 'Tent', category: 'shelter', quantity: 1 });
+      raw.push({ name: 'Tent pegs', category: 'shelter', quantity: expectsWind ? 12 : 6 });
+      raw.push({ name: hasSnow ? 'Winter sleeping bag (-20°C)' : isCold ? '3-season sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: hasSnow ? 'Insulating mat' : 'Self-inflating sleeping mat', category: 'sleeping', quantity: adults });
+      if (!hasSnow) raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
     } else if (sleepSetup === 'car') {
-      raw.push({ name: 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: hasSnow ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Blanket', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Window sun shades', category: 'sleeping', quantity: 1 });
     } else if (sleepSetup === 'car-tent') {
       raw.push({ name: 'Car / roof tent', category: 'shelter', quantity: 1 });
-      raw.push({ name: isWinter ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: hasSnow ? 'Winter sleeping bag (-20°C)' : 'Sleeping bag', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Sleeping mat', category: 'sleeping', quantity: adults });
     } else if (sleepSetup === 'van') {
-      raw.push({ name: isWinter ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
+      raw.push({ name: hasSnow ? 'Winter sleeping bag' : 'Sleeping bag', category: 'sleeping', quantity: adults });
       raw.push({ name: 'Pillow', category: 'sleeping', quantity: adults });
-      if (!isWinter) raw.push({ name: 'Lightweight blanket', category: 'sleeping', quantity: adults });
+      if (!hasSnow) raw.push({ name: 'Lightweight blanket', category: 'sleeping', quantity: adults });
     }
-    if (isWinter && sleepSetup !== 'car') {
+    if (hasSnow && sleepSetup !== 'car') {
       raw.push({ name: 'Mat underlay', category: 'sleeping', quantity: adults });
     }
+    if (hasColdNights && !hasSnow) {
+      raw.push({ name: 'Sleeping bag liner', category: 'sleeping', quantity: adults });
+    }
     if (hasKids) {
-      raw.push({ name: isWinter ? "Kids' winter sleeping bag" : "Kids' sleeping bag", category: 'sleeping', quantity: kids });
+      raw.push({ name: hasSnow ? "Kids' winter sleeping bag" : "Kids' sleeping bag", category: 'sleeping', quantity: kids });
       raw.push({ name: "Kids' sleeping mat", category: 'sleeping', quantity: kids });
     }
   }
 
   // ── COOKING ──────────────────────────────────────────────────────
 
-  // STOVE / FUEL (for camp stove cooking or freeze-dried)
   if (needsHotWater && !vHasStove) {
     const fuel = fuelSource ?? 'gas';
     if (fuel === 'gas') {
-      raw.push({ name: isWinter ? 'Cold-weather gas stove' : 'Gas stove', category: 'cooking', quantity: 1 });
-      raw.push({ name: isWinter ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 2.5)) });
+      raw.push({ name: hasSnow ? 'Cold-weather gas stove' : 'Gas stove', category: 'cooking', quantity: 1 });
+      raw.push({ name: hasSnow ? 'Winter gas canister' : 'Gas canister', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 2.5)) });
     } else if (fuel === 'alcohol') {
       raw.push({ name: 'Alcohol stove', category: 'cooking', quantity: 1 });
       raw.push({ name: 'Alcohol fuel bottle', category: 'cooking', quantity: Math.max(1, Math.ceil(nights / 4)) });
@@ -169,28 +180,24 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     }
   }
 
-  // CAMPFIRE GEAR
   if (hasCampfire) {
     raw.push({ name: 'Grill grate / tripod', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Fire starter', category: 'cooking', quantity: 1 });
   }
 
-  // BBQ GEAR
   if (hasBBQ) {
     raw.push({ name: 'Portable BBQ / grill', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Charcoal / briquettes', category: 'cooking', quantity: isLong ? 3 : 1 });
     raw.push({ name: 'BBQ tongs', category: 'cooking', quantity: 1 });
-    raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 }); // deduped if also campfire
+    raw.push({ name: 'Lighter', category: 'cooking', quantity: 1 });
   }
 
-  // COLD FOOD EXTRAS
   if (hasColdFood) {
     if (!vHasFridge) raw.push({ name: 'Camping cooler', category: 'cooking', quantity: 1 });
     raw.push({ name: 'Folding knife', category: 'cooking', quantity: 1 });
   }
 
-  // COOKING VESSELS & UTENSILS
   if (hasRealCooking) {
     raw.push({ name: 'Pot', category: 'cooking', quantity: 1 });
     if (hasStoveCooking || hasBBQ) raw.push({ name: 'Pan', category: 'cooking', quantity: 1 });
@@ -206,11 +213,10 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Cutlery', category: 'cooking', quantity: ppl });
   }
 
-  // WATER BOTTLE (always)
-  raw.push({ name: 'Reusable water bottle', category: 'cooking', quantity: ppl });
+  raw.push({ name: 'Reusable water bottle', category: 'cooking', quantity: isHot ? ppl * 2 : ppl });
 
   // ── CLOTHING ─────────────────────────────────────────────────────
-  if (isWinter) {
+  if (hasSnow) {
     raw.push({ name: 'Down jacket', category: 'clothing', quantity: adults });
     raw.push({ name: 'Ski pants', category: 'clothing', quantity: adults });
     raw.push({ name: 'Gloves', category: 'clothing', quantity: adults });
@@ -225,12 +231,20 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     }
   } else {
     raw.push({ name: 'Rain jacket', category: 'clothing', quantity: adults });
-    if (isCold) raw.push({ name: 'Fleece', category: 'clothing', quantity: adults });
+    if (isCold) {
+      raw.push({ name: 'Fleece', category: 'clothing', quantity: adults });
+      raw.push({ name: 'Gloves', category: 'clothing', quantity: adults });
+    }
     raw.push({ name: 'Socks', category: 'clothing', quantity: adults * socks });
     if (hasKids) {
       raw.push({ name: "Kids' rain jacket", category: 'clothing', quantity: kids });
       raw.push({ name: "Kids' socks", category: 'clothing', quantity: kids * socks });
     }
+  }
+
+  if (isHot) {
+    raw.push({ name: 'Sun hat', category: 'clothing', quantity: adults });
+    raw.push({ name: 'Cooling towel', category: 'other', quantity: ppl });
   }
 
   // ── TOOLS ────────────────────────────────────────────────────────
@@ -242,9 +256,18 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Power bank', category: 'tools', quantity: isLargeGroup ? 2 : 1 });
   }
   if (isVehicleSleep && !vHasLighting) raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
-  if (isWinter) {
+  if (hasSnow) {
     raw.push({ name: 'Crampons / microspikes', category: 'tools', quantity: adults });
     raw.push({ name: 'Snow shovel', category: 'tools', quantity: 1 });
+  }
+  if (expectsWind && sleepSetup === 'tent') {
+    raw.push({ name: 'Guy lines', category: 'tools', quantity: 1 });
+  }
+
+  // ── RAIN EXTRAS ──────────────────────────────────────────────────
+  if (expectsRain) {
+    raw.push({ name: 'Dry bag / pack cover', category: 'other', quantity: 1 });
+    raw.push({ name: 'Waterproof bag liners', category: 'other', quantity: 1 });
   }
 
   // ── VEHICLE COMFORTS ─────────────────────────────────────────────
@@ -258,7 +281,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
     raw.push({ name: 'Trekking poles', category: 'tools', quantity: adults * 2 });
     raw.push({ name: 'Map + compass', category: 'tools', quantity: 1 });
     raw.push({ name: 'Hiking boots', category: 'clothing', quantity: adults });
-    if (isWinter) raw.push({ name: 'Gaiters', category: 'clothing', quantity: adults });
+    if (hasSnow) raw.push({ name: 'Gaiters', category: 'clothing', quantity: adults });
     raw.push({ name: 'Blister pads', category: 'first-aid', quantity: 1 });
   }
   if (activities.includes('swimming')) {
@@ -294,7 +317,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   if (activities.includes('trail-running')) {
     raw.push({ name: 'Trail running shoes', category: 'clothing', quantity: adults });
     raw.push({ name: 'Hydration vest', category: 'tools', quantity: adults });
-    if (!isWinter) raw.push({ name: 'Running gaiters', category: 'clothing', quantity: adults });
+    if (!hasSnow) raw.push({ name: 'Running gaiters', category: 'clothing', quantity: adults });
     raw.push({ name: 'Blister pads', category: 'first-aid', quantity: 1 });
   }
   if (activities.includes('photography')) {
@@ -338,10 +361,12 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
 
   // ── FIRST AID ────────────────────────────────────────────────────
   if (!vHasFirstAidKit) raw.push({ name: 'First aid kit', category: 'first-aid', quantity: 1 });
-  if (!isWinter) raw.push({ name: 'Insect repellent', category: 'first-aid', quantity: 1 });
-  if (season === 'summer') raw.push({ name: 'Sunscreen', category: 'first-aid', quantity: 1 });
-  if (isWinter) {
+  if (!hasSnow) raw.push({ name: 'Insect repellent', category: 'first-aid', quantity: 1 });
+  if (isHot || highUV) raw.push({ name: 'Sunscreen', category: 'first-aid', quantity: 1 });
+  if (hasSnow || (isCold && overnight)) {
     raw.push({ name: 'Emergency blanket', category: 'first-aid', quantity: ppl });
+  }
+  if (hasSnow) {
     raw.push({ name: 'Chemical hand warmers', category: 'other', quantity: ppl * 2 });
   }
 

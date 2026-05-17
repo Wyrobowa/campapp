@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type {
   CreatorAnswers, SleepSetup, EatingSetup, FuelSource, VehicleEquipment,
-  Activity, Duration, GroupComposition, Season, GeneratedItem,
+  Activity, Duration, GroupComposition, WeatherCondition, GeneratedItem,
 } from '../../data/templateGenerator';
 
 import { generateItems, generateTemplateName } from '../../data/templateGenerator';
@@ -78,10 +78,15 @@ const DURATION_OPTIONS: Option<Duration>[] = [
   { value: 'long', emoji: '🗓️', label: 'A week or more', description: 'Long expedition' },
 ];
 
-const SEASON_OPTIONS: Option<Season>[] = [
-  { value: 'summer', emoji: '☀️', label: 'Summer', description: 'Warm and dry' },
-  { value: 'shoulder', emoji: '🍂', label: 'Spring / Autumn', description: 'Mild, variable weather' },
-  { value: 'winter', emoji: '❄️', label: 'Winter', description: 'Cold, snow possible' },
+const WEATHER_OPTIONS: Option<WeatherCondition>[] = [
+  { value: 'cold', emoji: '🥶', label: 'Cold days', description: 'Temperatures below 10 °C' },
+  { value: 'cold-nights', emoji: '🌙', label: 'Cold nights', description: 'Nights near or below freezing' },
+  { value: 'snow', emoji: '❄️', label: 'Snow / ice', description: 'Snow or icy terrain expected' },
+  { value: 'rain', emoji: '🌧️', label: 'Rain', description: 'Wet weather likely' },
+  { value: 'wind', emoji: '💨', label: 'Strong wind', description: 'Exposed or windy terrain' },
+  { value: 'extreme-heat', emoji: '🥵', label: 'Extreme heat', description: 'Scorching sun and high temps' },
+  { value: 'high-uv', emoji: '🔆', label: 'High UV', description: 'Intense sun exposure' },
+  { value: 'humid', emoji: '💦', label: 'High humidity', description: 'Sticky and humid conditions' },
 ];
 
 // ── QUESTION DEFINITIONS ─────────────────────────────────────────
@@ -102,17 +107,18 @@ const FUEL_Q: QuestionDef = { key: 'fuelSource', heading: 'What will you cook on
 const ACTIVITIES_Q: QuestionDef = { key: 'activities', heading: 'Any planned activities?', subheading: 'Select all that apply. Skip if none.', multiSelect: true, options: ACTIVITY_OPTIONS, cols: 2 };
 const DURATION_Q: QuestionDef = { key: 'duration', heading: 'How long is the trip?', subheading: 'Affects quantities and supply planning.', multiSelect: false, options: DURATION_OPTIONS, cols: 2 };
 const GROUP_Q: QuestionDef = { key: 'group', heading: "Who's coming?", subheading: 'Sets quantities for personal gear.', multiSelect: false, options: [], cols: 1 };
-const SEASON_Q: QuestionDef = { key: 'season', heading: 'What season?', subheading: 'Determines clothing and weather gear.', multiSelect: false, options: SEASON_OPTIONS, cols: 1 };
+const WEATHER_Q: QuestionDef = { key: 'weather', heading: 'What weather do you expect?', subheading: 'Select all that apply. Skip if unsure.', multiSelect: true, options: WEATHER_OPTIONS, cols: 2 };
 
 // ── TYPES ────────────────────────────────────────────────────────
 
-type MultiKey = 'activities' | 'vehicleEquipment' | 'eatingSetup';
+type MultiKey = 'activities' | 'vehicleEquipment' | 'eatingSetup' | 'weather';
 type SingleKey = Exclude<keyof CreatorAnswers, MultiKey | 'group'>;
 
 type PartialAnswers = Omit<Partial<CreatorAnswers>, MultiKey | 'group'> & {
   activities: Activity[];
   vehicleEquipment: VehicleEquipment[];
   eatingSetup: EatingSetup[];
+  weather: WeatherCondition[];
   group: GroupComposition;
 };
 
@@ -126,7 +132,7 @@ function computeQuestions(answers: PartialAnswers): QuestionDef[] {
   const qs: QuestionDef[] = [SLEEP_Q, EAT_Q];
   if (isVehicleSleep) qs.push(VEHICLE_Q);
   if (needsFuel) qs.push(FUEL_Q);
-  qs.push(ACTIVITIES_Q, DURATION_Q, GROUP_Q, SEASON_Q);
+  qs.push(ACTIVITIES_Q, DURATION_Q, GROUP_Q, WEATHER_Q);
   return qs;
 }
 
@@ -179,6 +185,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
     activities: [],
     vehicleEquipment: [],
     eatingSetup: [],
+    weather: [],
     group: { adults: 1, kids: 0, pets: 0 },
   });
   const [templateName, setTemplateName] = useState('');
@@ -403,7 +410,9 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
               ? selectedMulti.length === 0 ? 'Nothing pre-packed — continue' : `Continue (${selectedMulti.length} already packed)`
               : question.key === 'eatingSetup'
                 ? selectedMulti.length === 0 ? 'Continue — eating out only' : `Continue (${selectedMulti.length} meal type${selectedMulti.length === 1 ? '' : 's'})`
-                : selectedMulti.length === 0 ? 'Skip — no specific activities' : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
+                : question.key === 'weather'
+                  ? selectedMulti.length === 0 ? 'Skip — not sure yet' : `Continue (${selectedMulti.length} condition${selectedMulti.length === 1 ? '' : 's'})`
+                  : selectedMulti.length === 0 ? 'Skip — no specific activities' : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
         </Button>
       )}
     </div>
