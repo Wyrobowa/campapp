@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import type { CreatorAnswers, TripType, Duration, GroupSize, Season, GeneratedItem } from '../../data/templateGenerator';
+import type {
+  CreatorAnswers, SleepSetup, EatingSetup, FuelSource, VehicleEquipment,
+  Activity, Duration, GroupSize, Season, GeneratedItem,
+} from '../../data/templateGenerator';
 import { generateItems, generateTemplateName } from '../../data/templateGenerator';
 import { CATEGORIES } from '../../data/categories';
 import { Button } from '../ui/Button';
@@ -10,69 +13,202 @@ interface TemplateCreatorProps {
   onCancel: () => void;
 }
 
-interface QuestionOption<T extends string> {
+interface Option<T extends string> {
   value: T;
   emoji: string;
   label: string;
   description: string;
 }
 
-const TRIP_TYPE_OPTIONS: QuestionOption<TripType>[] = [
-  { value: 'tent', emoji: '⛺', label: 'Tent camping', description: 'Backpacking with a tent' },
-  { value: 'car', emoji: '🚗', label: 'Car camping', description: 'Comfort camping by the car' },
-  { value: 'hiking', emoji: '🥾', label: 'Hiking', description: 'Ultralight backpacking' },
-  { value: 'winter', emoji: '❄️', label: 'Winter camping', description: 'Cold-weather overnight' },
+// ── OPTION LISTS ─────────────────────────────────────────────────
+
+const SLEEP_OPTIONS: Option<SleepSetup>[] = [
+  { value: 'tent', emoji: '⛺', label: 'Tent', description: 'Traditional tent setup' },
+  { value: 'car', emoji: '🚗', label: 'In the car', description: 'Sleeping in your car' },
+  { value: 'car-tent', emoji: '🏕️', label: 'Car / roof tent', description: 'Tent attached to the car' },
+  { value: 'van', emoji: '🚐', label: 'Van / campervan', description: 'Converted van or motorhome' },
 ];
 
-const DURATION_OPTIONS: QuestionOption<Duration>[] = [
+const EAT_OPTIONS: Option<EatingSetup>[] = [
+  { value: 'cook-all', emoji: '🍳', label: 'Cook all meals', description: 'Full camp kitchen setup' },
+  { value: 'mix', emoji: '🔀', label: 'Mix', description: 'Some cooking, some eating out' },
+  { value: 'restaurants', emoji: '🍽️', label: 'Mostly restaurants', description: 'Eating out every day' },
+  { value: 'cold-food', emoji: '🥗', label: 'Cold food only', description: 'No cooking, just snacks & prep' },
+];
+
+const VEHICLE_OPTIONS: Option<VehicleEquipment>[] = [
+  { value: 'fridge', emoji: '🧊', label: 'Fridge / cooler', description: 'Car fridge or portable cooler' },
+  { value: 'stove', emoji: '🍳', label: 'Camp stove / kitchen', description: 'Cooking setup already packed' },
+  { value: 'inverter', emoji: '⚡', label: 'Power inverter / solar', description: 'Shore power, inverter or solar' },
+  { value: 'chairs-table', emoji: '🪑', label: 'Chairs & table', description: 'Camping furniture already in the car' },
+];
+
+const FUEL_OPTIONS: Option<FuelSource>[] = [
+  { value: 'gas', emoji: '⛽', label: 'Gas canister stove', description: 'Most common, easy to find' },
+  { value: 'alcohol', emoji: '🍶', label: 'Alcohol stove', description: 'Lightweight, ultralight setups' },
+  { value: 'electric', emoji: '⚡', label: 'Electric / induction', description: 'Needs a power source' },
+  { value: 'campfire', emoji: '🔥', label: 'Campfire', description: 'Wood fire where permitted' },
+];
+
+const ACTIVITY_OPTIONS: Option<Activity>[] = [
+  { value: 'hiking', emoji: '🥾', label: 'Hiking', description: 'Trails and trekking' },
+  { value: 'swimming', emoji: '🏊', label: 'Swimming', description: 'Lakes, rivers or sea' },
+  { value: 'cycling', emoji: '🚲', label: 'Cycling', description: 'Bike rides or touring' },
+  { value: 'climbing', emoji: '🧗', label: 'Climbing', description: 'Rock or sport climbing' },
+  { value: 'fishing', emoji: '🎣', label: 'Fishing', description: 'Angling or fly fishing' },
+  { value: 'paddling', emoji: '🛶', label: 'Paddling', description: 'Kayak, canoe or SUP' },
+];
+
+const DURATION_OPTIONS: Option<Duration>[] = [
   { value: 'day', emoji: '🌅', label: 'Day trip', description: 'No overnight stay' },
   { value: 'short', emoji: '🌙', label: '1–2 nights', description: 'Short weekend trip' },
   { value: 'medium', emoji: '📅', label: '3–5 nights', description: 'Extended trip' },
   { value: 'long', emoji: '🗓️', label: 'A week or more', description: 'Long expedition' },
 ];
 
-const GROUP_OPTIONS: QuestionOption<GroupSize>[] = [
+const GROUP_OPTIONS: Option<GroupSize>[] = [
   { value: 'solo', emoji: '🧍', label: 'Solo', description: 'Just me' },
-  { value: 'duo', emoji: '👫', label: 'Two people', description: 'Pair or couple' },
+  { value: 'duo', emoji: '👫', label: 'Two adults', description: 'Pair or couple' },
+  { value: 'family', emoji: '👨‍👩‍👧', label: 'Family with kids', description: 'Adults + children' },
+  { value: 'with-pet', emoji: '🐕', label: 'With a pet', description: 'Dog or other animal' },
   { value: 'group', emoji: '👥', label: 'Small group', description: '3 to 5 people' },
+  { value: 'large-group', emoji: '🏕️', label: 'Large group', description: '6 or more people' },
 ];
 
-const SEASON_OPTIONS: QuestionOption<Season>[] = [
+const SEASON_OPTIONS: Option<Season>[] = [
   { value: 'summer', emoji: '☀️', label: 'Summer', description: 'Warm and dry' },
   { value: 'shoulder', emoji: '🍂', label: 'Spring / Autumn', description: 'Mild, variable weather' },
   { value: 'winter', emoji: '❄️', label: 'Winter', description: 'Cold, snow possible' },
 ];
 
-const QUESTIONS = [
-  { key: 'tripType' as const, heading: 'What kind of trip?', options: TRIP_TYPE_OPTIONS },
-  { key: 'duration' as const, heading: 'How long?', options: DURATION_OPTIONS },
-  { key: 'groupSize' as const, heading: "Who's coming?", options: GROUP_OPTIONS },
-  { key: 'season' as const, heading: 'What season?', options: SEASON_OPTIONS },
-];
+// ── QUESTION DEFINITIONS ─────────────────────────────────────────
+
+interface QuestionDef {
+  key: keyof PartialAnswers;
+  heading: string;
+  subheading: string;
+  multiSelect: boolean;
+  options: Option<string>[];
+  cols: 1 | 2;
+}
+
+const SLEEP_Q: QuestionDef = {
+  key: 'sleepSetup', heading: 'Where will you sleep?',
+  subheading: 'Your main sleeping setup for this trip.',
+  multiSelect: false, options: SLEEP_OPTIONS, cols: 2,
+};
+const EAT_Q: QuestionDef = {
+  key: 'eatingSetup', heading: 'How will you eat?',
+  subheading: "This shapes what cooking gear you'll need.",
+  multiSelect: false, options: EAT_OPTIONS, cols: 2,
+};
+const VEHICLE_Q: QuestionDef = {
+  key: 'vehicleEquipment', heading: "What's already in your vehicle?",
+  subheading: "Select what you've already got packed — those items won't appear on your list.",
+  multiSelect: true, options: VEHICLE_OPTIONS, cols: 2,
+};
+const FUEL_Q: QuestionDef = {
+  key: 'fuelSource', heading: 'What will you cook on?',
+  subheading: 'Determines which stove and fuel to add to your list.',
+  multiSelect: false, options: FUEL_OPTIONS, cols: 2,
+};
+const ACTIVITIES_Q: QuestionDef = {
+  key: 'activities', heading: 'Any planned activities?',
+  subheading: 'Select all that apply. Skip if none.',
+  multiSelect: true, options: ACTIVITY_OPTIONS, cols: 2,
+};
+const DURATION_Q: QuestionDef = {
+  key: 'duration', heading: 'How long is the trip?',
+  subheading: 'Affects quantities and supply planning.',
+  multiSelect: false, options: DURATION_OPTIONS, cols: 2,
+};
+const GROUP_Q: QuestionDef = {
+  key: 'groupSize', heading: "Who's coming?",
+  subheading: 'Sets quantities for personal gear.',
+  multiSelect: false, options: GROUP_OPTIONS, cols: 2,
+};
+const SEASON_Q: QuestionDef = {
+  key: 'season', heading: 'What season?',
+  subheading: 'Determines clothing and weather gear.',
+  multiSelect: false, options: SEASON_OPTIONS, cols: 1,
+};
+
+// ── TYPES ────────────────────────────────────────────────────────
+
+type MultiKey = 'activities' | 'vehicleEquipment';
+type SingleKey = Exclude<keyof CreatorAnswers, MultiKey>;
+
+type PartialAnswers = Omit<Partial<CreatorAnswers>, MultiKey> & {
+  activities: Activity[];
+  vehicleEquipment: VehicleEquipment[];
+};
+
+// ── DYNAMIC QUESTION BUILDER ─────────────────────────────────────
+
+function computeQuestions(answers: PartialAnswers): QuestionDef[] {
+  const isVehicleSleep = answers.sleepSetup === 'car' || answers.sleepSetup === 'van' || answers.sleepSetup === 'car-tent';
+  const isCooking = answers.eatingSetup === 'cook-all' || answers.eatingSetup === 'mix';
+  const vHasStove = answers.vehicleEquipment.includes('stove');
+
+  const qs: QuestionDef[] = [SLEEP_Q, EAT_Q];
+  if (isVehicleSleep) qs.push(VEHICLE_Q);
+  if (isCooking && !vHasStove) qs.push(FUEL_Q);
+  qs.push(ACTIVITIES_Q, DURATION_Q, GROUP_Q, SEASON_Q);
+  return qs;
+}
+
+// ── COMPONENT ────────────────────────────────────────────────────
 
 export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Partial<CreatorAnswers>>({});
+  const [answers, setAnswers] = useState<PartialAnswers>({ activities: [], vehicleEquipment: [] });
   const [templateName, setTemplateName] = useState('');
   const [items, setItems] = useState<GeneratedItem[]>([]);
 
-  function handleAnswer(key: keyof CreatorAnswers, value: string) {
-    const newAnswers = { ...answers, [key]: value } as Partial<CreatorAnswers>;
-    setAnswers(newAnswers);
+  const questions = computeQuestions(answers);
+  const isReview = step >= questions.length;
 
-    if (step < QUESTIONS.length - 1) {
+  function goToReview(final: PartialAnswers) {
+    const full = final as CreatorAnswers;
+    setItems(generateItems(full));
+    setTemplateName(generateTemplateName(full));
+    setStep(questions.length);
+  }
+
+  function advance(nextAnswers: PartialAnswers) {
+    const nextQuestions = computeQuestions(nextAnswers);
+    if (step < nextQuestions.length - 1) {
       setStep((s) => s + 1);
     } else {
-      const fullAnswers = newAnswers as CreatorAnswers;
-      setItems(generateItems(fullAnswers));
-      setTemplateName(generateTemplateName(fullAnswers));
-      setStep(QUESTIONS.length);
+      goToReview(nextAnswers);
     }
+  }
+
+  function handleSingleSelect(key: SingleKey, value: string) {
+    const next = { ...answers, [key]: value };
+    setAnswers(next);
+    advance(next);
+  }
+
+  function handleMultiToggle(key: MultiKey, value: string) {
+    setAnswers((prev) => {
+      const current = prev[key] as string[];
+      const updated = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+      return { ...prev, [key]: updated };
+    });
+  }
+
+  function handleMultiContinue() {
+    advance(answers);
   }
 
   function handleBack() {
     if (step === 0) {
       onCancel();
+    } else if (isReview) {
+      setStep(questions.length - 1);
     } else {
       setStep((s) => s - 1);
     }
@@ -87,37 +223,31 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
     onSave(templateName.trim(), items);
   }
 
-  const BackButton = ({ to }: { to: number | 'cancel' }) => (
+  const BackButton = ({ label }: { label: string }) => (
     <button
-      onClick={to === 'cancel' ? onCancel : () => setStep(typeof to === 'number' ? to : 0)}
+      onClick={handleBack}
       className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-6 -ml-1 p-1 rounded"
     >
       <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
         <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      {to === 'cancel' ? 'Templates' : 'Back'}
+      {label}
     </button>
   );
 
-  // Review step
-  if (step === QUESTIONS.length) {
+  // ── REVIEW SCREEN ────────────────────────────────────────────────
+  if (isReview) {
     const categoriesWithItems = CATEGORIES.filter((c) =>
       items.some((item) => item.category === c.id)
     );
-
     return (
       <div className="p-4 max-w-lg mx-auto">
-        <BackButton to={QUESTIONS.length - 1} />
-
+        <BackButton label="Back" />
         <h2 className="text-xl font-bold text-gray-900 mb-1">Your template</h2>
         <p className="text-sm text-gray-500 mb-5">Remove items you don't need, then save.</p>
 
         <div className="mb-5">
-          <Input
-            label="Template name"
-            value={templateName}
-            onChange={(e) => setTemplateName(e.target.value)}
-          />
+          <Input label="Template name" value={templateName} onChange={(e) => setTemplateName(e.target.value)} />
         </div>
 
         <div className="space-y-5 mb-6">
@@ -130,15 +260,10 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                 {items
                   .filter((item) => item.category === cat.id)
                   .map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100"
-                    >
+                    <li key={item.id} className="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100">
                       <span className="text-sm text-gray-800">
                         {item.name}
-                        {item.quantity > 1 && (
-                          <span className="ml-1.5 text-xs text-gray-400">×{item.quantity}</span>
-                        )}
+                        {item.quantity > 1 && <span className="ml-1.5 text-xs text-gray-400">×{item.quantity}</span>}
                       </span>
                       <button
                         onClick={() => handleRemoveItem(item.id)}
@@ -156,58 +281,82 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
           ))}
         </div>
 
-        <Button
-          onClick={handleSave}
-          className="w-full justify-center"
-          disabled={!templateName.trim() || items.length === 0}
-        >
+        <Button onClick={handleSave} className="w-full justify-center" disabled={!templateName.trim() || items.length === 0}>
           Save template ({items.length} items)
         </Button>
       </div>
     );
   }
 
-  // Question step
-  const question = QUESTIONS[step];
-  const cols = question.options.length === 3 ? 'grid-cols-1' : 'grid-cols-2';
+  // ── QUESTION SCREEN ──────────────────────────────────────────────
+  const question = questions[step];
+  const isMulti = question.multiSelect;
+  const multiKey = isMulti ? (question.key as MultiKey) : null;
+  const selectedMulti = multiKey ? (answers[multiKey] as string[]) : [];
 
   return (
     <div className="p-4 max-w-lg mx-auto">
-      <BackButton to={step === 0 ? 'cancel' : step - 1} />
+      <BackButton label={step === 0 ? 'Templates' : 'Back'} />
 
-      <div className="flex gap-1.5 mb-7">
-        {QUESTIONS.map((_, i) => (
+      {/* Progress bar — dynamic width based on current question count */}
+      <div className="flex gap-1.5 mb-6">
+        {questions.map((_, i) => (
           <div
             key={i}
-            className={`h-1 rounded-full flex-1 transition-colors duration-300 ${
-              i <= step ? 'bg-[#2D5016]' : 'bg-gray-200'
-            }`}
+            className={`h-1 rounded-full flex-1 transition-colors duration-300 ${i <= step ? 'bg-[#2D5016]' : 'bg-gray-200'}`}
           />
         ))}
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 mb-5">{question.heading}</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-1">{question.heading}</h2>
+      <p className="text-sm text-gray-500 mb-5">{question.subheading}</p>
 
-      <div className={`grid ${cols} gap-3`}>
+      <div className={`grid gap-3 mb-5 ${question.cols === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
         {question.options.map((option) => {
-          const isSelected = answers[question.key] === option.value;
+          const isSelected = isMulti
+            ? selectedMulti.includes(option.value)
+            : answers[question.key as SingleKey] === option.value;
+
           return (
             <button
               key={option.value}
-              onClick={() => handleAnswer(question.key, option.value)}
+              onClick={() =>
+                isMulti
+                  ? handleMultiToggle(multiKey!, option.value)
+                  : handleSingleSelect(question.key as SingleKey, option.value)
+              }
               className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${
-                isSelected
-                  ? 'border-[#2D5016] bg-[#F0F4EC]'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                isSelected ? 'border-[#2D5016] bg-[#F0F4EC]' : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              <span className="text-2xl mb-2">{option.emoji}</span>
+              <div className="w-full flex items-start justify-between mb-2">
+                <span className="text-2xl">{option.emoji}</span>
+                {isMulti && isSelected && (
+                  <span className="w-5 h-5 rounded-full bg-[#2D5016] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                )}
+              </div>
               <span className="font-semibold text-gray-900 text-sm leading-tight">{option.label}</span>
               <span className="text-xs text-gray-500 mt-0.5">{option.description}</span>
             </button>
           );
         })}
       </div>
+
+      {isMulti && (
+        <Button onClick={handleMultiContinue} className="w-full justify-center">
+          {question.key === 'vehicleEquipment'
+            ? selectedMulti.length === 0
+              ? 'Nothing pre-packed — continue'
+              : `Continue (${selectedMulti.length} item${selectedMulti.length === 1 ? '' : 's'} already packed)`
+            : selectedMulti.length === 0
+              ? 'Skip — no specific activities'
+              : `Continue with ${selectedMulti.length} activit${selectedMulti.length === 1 ? 'y' : 'ies'}`}
+        </Button>
+      )}
     </div>
   );
 }
