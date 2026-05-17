@@ -4,7 +4,7 @@ import { generateId } from '../utils/id';
 export type SleepSetup = 'tent' | 'car' | 'car-tent' | 'van';
 export type EatingSetup = 'stove' | 'campfire' | 'bbq' | 'cold-food' | 'freeze-dried' | 'restaurants';
 export type FuelSource = 'gas' | 'alcohol' | 'electric' | 'campfire';
-export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table';
+export type VehicleEquipment = 'fridge' | 'stove' | 'inverter' | 'chairs-table' | 'lighting' | 'first-aid-kit' | 'awning' | 'water-tank';
 export type Activity = 'hiking' | 'swimming' | 'cycling' | 'climbing' | 'fishing' | 'paddling' | 'trail-running' | 'photography' | 'yoga' | 'stargazing' | 'surfing';
 export type Duration = 'day' | 'short' | 'medium' | 'long';
 export type Season = 'summer' | 'shoulder' | 'winter';
@@ -107,6 +107,8 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   const vHasStove = vehicleEquipment.includes('stove');
   const vHasInverter = vehicleEquipment.includes('inverter');
   const vHasChairsTable = vehicleEquipment.includes('chairs-table');
+  const vHasLighting = vehicleEquipment.includes('lighting');
+  const vHasFirstAidKit = vehicleEquipment.includes('first-aid-kit');
 
   const eating = eatingSetup;
   const hasStoveCooking = eating.includes('stove');
@@ -239,7 +241,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   if ((isLong || sleepSetup === 'van') && !vHasInverter && !usingElectric) {
     raw.push({ name: 'Power bank', category: 'tools', quantity: isLargeGroup ? 2 : 1 });
   }
-  if (isVehicleSleep) raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
+  if (isVehicleSleep && !vHasLighting) raw.push({ name: 'LED lantern', category: 'tools', quantity: 1 });
   if (isWinter) {
     raw.push({ name: 'Crampons / microspikes', category: 'tools', quantity: adults });
     raw.push({ name: 'Snow shovel', category: 'tools', quantity: 1 });
@@ -335,7 +337,7 @@ export function generateItems(answers: CreatorAnswers): GeneratedItem[] {
   }
 
   // ── FIRST AID ────────────────────────────────────────────────────
-  raw.push({ name: 'First aid kit', category: 'first-aid', quantity: 1 });
+  if (!vHasFirstAidKit) raw.push({ name: 'First aid kit', category: 'first-aid', quantity: 1 });
   if (!isWinter) raw.push({ name: 'Insect repellent', category: 'first-aid', quantity: 1 });
   if (season === 'summer') raw.push({ name: 'Sunscreen', category: 'first-aid', quantity: 1 });
   if (isWinter) {

@@ -44,6 +44,10 @@ const VEHICLE_OPTIONS: Option<VehicleEquipment>[] = [
   { value: 'stove', emoji: '🍳', label: 'Camp stove / kitchen', description: 'Cooking setup already packed' },
   { value: 'inverter', emoji: '⚡', label: 'Power inverter / solar', description: 'Shore power, inverter or solar' },
   { value: 'chairs-table', emoji: '🪑', label: 'Chairs & table', description: 'Camping furniture already in the car' },
+  { value: 'lighting', emoji: '💡', label: 'Lighting', description: 'Lantern or string lights packed' },
+  { value: 'first-aid-kit', emoji: '🩺', label: 'First aid kit', description: 'Full kit already in the car' },
+  { value: 'awning', emoji: '🏕️', label: 'Awning / canopy', description: 'Vehicle awning or sun shelter' },
+  { value: 'water-tank', emoji: '💧', label: 'Water tank / carrier', description: 'Jerry can or built-in water tank' },
 ];
 
 const FUEL_OPTIONS: Option<FuelSource>[] = [
@@ -93,7 +97,7 @@ interface QuestionDef {
 
 const SLEEP_Q: QuestionDef = { key: 'sleepSetup', heading: 'Where will you sleep?', subheading: 'Your main sleeping setup for this trip.', multiSelect: false, options: SLEEP_OPTIONS, cols: 2 };
 const EAT_Q: QuestionDef = { key: 'eatingSetup', heading: 'How will you eat?', subheading: 'Select all that apply.', multiSelect: true, options: EAT_OPTIONS, cols: 2 };
-const VEHICLE_Q: QuestionDef = { key: 'vehicleEquipment', heading: "What's already in your vehicle?", subheading: "Select what you've already got packed — those items won't appear on your list.", multiSelect: true, options: VEHICLE_OPTIONS, cols: 2 };
+const VEHICLE_Q: QuestionDef = { key: 'vehicleEquipment', heading: "What's already in your vehicle?", subheading: "Select what you've already packed — we'll skip duplicates from your list.", multiSelect: true, options: VEHICLE_OPTIONS, cols: 2 };
 const FUEL_Q: QuestionDef = { key: 'fuelSource', heading: 'What will you cook on?', subheading: 'Determines which stove and fuel to add to your list.', multiSelect: false, options: FUEL_OPTIONS, cols: 2 };
 const ACTIVITIES_Q: QuestionDef = { key: 'activities', heading: 'Any planned activities?', subheading: 'Select all that apply. Skip if none.', multiSelect: true, options: ACTIVITY_OPTIONS, cols: 2 };
 const DURATION_Q: QuestionDef = { key: 'duration', heading: 'How long is the trip?', subheading: 'Affects quantities and supply planning.', multiSelect: false, options: DURATION_OPTIONS, cols: 2 };
