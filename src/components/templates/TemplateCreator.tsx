@@ -678,7 +678,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                   onChange={(e) => {
                     handleDateRange('startDate', e.target.value);
                   }}
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
+                  className="field-base"
                 />
               </div>
               <div className="flex-1 flex flex-col gap-1">
@@ -690,7 +690,7 @@ export function TemplateCreator({ onSave, onCancel }: TemplateCreatorProps) {
                   onChange={(e) => {
                     handleDateRange('endDate', e.target.value);
                   }}
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
+                  className="field-base"
                 />
               </div>
             </div>

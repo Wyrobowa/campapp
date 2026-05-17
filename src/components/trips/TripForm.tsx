@@ -59,7 +59,7 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
           onChange={(e) => {
             setTemplateId(e.target.value);
           }}
-          className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest bg-white"
+          className="field-base bg-white"
         >
           <option value="">— start from scratch —</option>
           {templates.map((t) => (
@@ -81,7 +81,7 @@ export function TripForm({ templates, onSubmit, onCancel }: TripFormProps) {
           }}
           rows={3}
           placeholder="Campsite, route plan..."
-          className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest resize-none"
+          className="field-base resize-none"
         />
       </div>
       <div className="flex gap-3 justify-end pt-2">

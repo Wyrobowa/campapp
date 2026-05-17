@@ -39,7 +39,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
             onChange={(e) => {
               setCategory(e.target.value as GearCategory);
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest bg-white"
+            className="field-base bg-white"
           >
             {CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>
@@ -57,7 +57,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
             onChange={(e) => {
               setQuantity(Math.max(1, parseInt(e.target.value) || 1));
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
+            className="field-base"
           />
         </div>
       </div>

@@ -12,11 +12,7 @@ export function Input({ label, className = '', id, ...props }: InputProps) {
           {label}
         </label>
       )}
-      <input
-        id={id}
-        className={`w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest ${className}`}
-        {...props}
-      />
+      <input id={id} className={`field-base w-full ${className}`} {...props} />
     </div>
   );
 }

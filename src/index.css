@@ -8,6 +8,25 @@
   --color-surface: #f0f4ec;
   --color-surface-hover: #e4ecda;
   --color-charcoal: #1c1c1c;
+
+  --animate-fade-in: fade-in 0.18s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@layer components {
+  .field-base {
+    @apply rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest;
+  }
 }
 
 * {
@@ -24,19 +43,4 @@ body {
     -apple-system,
     sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 8px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.18s ease-out forwards;
 }
