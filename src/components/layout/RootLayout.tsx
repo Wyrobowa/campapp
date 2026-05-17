@@ -1,4 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
+import { migrateFromLocalStorage } from '../../db';
+import { useTripsStore } from '../../store/trips';
+import { useTemplatesStore } from '../../store/templates';
+
+async function initApp() {
+  await migrateFromLocalStorage();
+  await Promise.all([useTripsStore.getState().hydrate(), useTemplatesStore.getState().hydrate()]);
+}
 
 function NavBar() {
   const { pathname } = useLocation();
@@ -41,6 +50,24 @@ function NavBar() {
 }
 
 export function RootLayout() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      await initApp();
+      setReady(true);
+    };
+    void init();
+  }, []);
+
+  if (!ready) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF5] flex items-center justify-center">
+        <p className="text-sm text-gray-400">Loading…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAF5]">
       <Outlet />
