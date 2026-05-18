@@ -25,6 +25,18 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         navigateFallback: 'index.html',
+        runtimeCaching: [
+          {
+            urlPattern: /\/api\/(trips|templates)(\/|$)/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'campapp-api',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
     }),
   ],
