@@ -1,6 +1,4 @@
-import type { GearCategory } from '../types';
-
-export const CATEGORIES: { id: GearCategory; label: string; emoji: string }[] = [
+export const CATEGORIES: { id: string; label: string; emoji: string }[] = [
   { id: 'shelter', label: 'Shelter', emoji: '⛺' },
   { id: 'sleeping', label: 'Sleeping', emoji: '🛌' },
   { id: 'cooking', label: 'Cooking', emoji: '🍳' },
@@ -11,6 +9,10 @@ export const CATEGORIES: { id: GearCategory; label: string; emoji: string }[] = 
 ];
 
 export const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c])) as Record<
-  GearCategory,
+  string,
   (typeof CATEGORIES)[number]
 >;
+
+export function getCategoryDisplay(id: string): { label: string; emoji: string } {
+  return CATEGORY_MAP[id] ?? { label: id, emoji: '📦' };
+}

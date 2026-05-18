@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ── PRIMITIVES ────────────────────────────────────────────────────
 
-export const GearCategorySchema = z.enum([
+export const BUILT_IN_CATEGORIES = [
   'shelter',
   'sleeping',
   'cooking',
@@ -10,7 +10,9 @@ export const GearCategorySchema = z.enum([
   'tools',
   'first-aid',
   'other',
-]);
+] as const;
+
+export const GearCategorySchema = z.string().min(1);
 
 // ── GEAR ITEM ─────────────────────────────────────────────────────
 
@@ -20,6 +22,9 @@ export const GearItemSchema = z.object({
   category: GearCategorySchema,
   quantity: z.number().int().positive(),
   packed: z.boolean(),
+  notes: z.string().optional(),
+  weight: z.number().nonnegative().optional(),
+  weightUnit: z.enum(['g', 'oz']).optional(),
 });
 
 export const TemplateItemSchema = GearItemSchema.omit({ packed: true });
