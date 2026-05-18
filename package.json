@@ -1,7 +1,10 @@
 {
   "name": "campapp-monorepo",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently -n web,api -c cyan,yellow \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
     "dev:web": "npm run dev -w apps/web",

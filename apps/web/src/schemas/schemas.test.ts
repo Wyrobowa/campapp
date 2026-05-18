@@ -91,26 +91,36 @@ describe('TripArraySchema', () => {
   });
 });
 
+const validTemplate = {
+  id: 'tmpl-1',
+  name: 'Hiking starter',
+  isDefault: false,
+  items: [{ id: 'i-1', name: 'Tent', category: 'shelter', quantity: 1 }],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
 describe('TemplateSchema', () => {
   it('accepts a valid template', () => {
-    const template = {
-      id: 'tmpl-1',
-      name: 'Hiking starter',
-      isDefault: false,
-      items: [{ id: 'i-1', name: 'Tent', category: 'shelter', quantity: 1 }],
-    };
-    expect(TemplateSchema.safeParse(template).success).toBe(true);
+    expect(TemplateSchema.safeParse(validTemplate).success).toBe(true);
+  });
+
+  it('accepts optional description', () => {
+    const result = TemplateSchema.safeParse({ ...validTemplate, description: 'A starter kit' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects missing createdAt', () => {
+    const { createdAt: _, ...noCreatedAt } = validTemplate;
+    expect(TemplateSchema.safeParse(noCreatedAt).success).toBe(false);
   });
 
   it('rejects template with packed field on items', () => {
+    // TemplateItemSchema omits packed — Zod strips unknown keys so it still passes
     const template = {
-      id: 'tmpl-1',
-      name: 'Test',
-      isDefault: false,
+      ...validTemplate,
       items: [{ id: 'i-1', name: 'Tent', category: 'shelter', quantity: 1, packed: true }],
     };
-    // TemplateItemSchema omits packed — Zod strips unknown keys so this still passes
-    // (Zod strips extra keys by default). The important thing is it parses successfully.
     expect(TemplateSchema.safeParse(template).success).toBe(true);
   });
 });
