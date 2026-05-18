@@ -22,9 +22,11 @@ function TripDetailView({ trip }: { trip: Trip }) {
     editing,
     editName,
     editDate,
+    editNotes,
     editError,
     setEditName,
     setEditDate,
+    setEditNotes,
     startEdit,
     cancelEdit,
     saveEdit,
@@ -99,6 +101,17 @@ function TripDetailView({ trip }: { trip: Trip }) {
               setEditDate(e.target.value);
             }}
           />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Notes</label>
+            <textarea
+              value={editNotes}
+              onChange={(e) => {
+                setEditNotes(e.target.value);
+              }}
+              placeholder="Optional notes…"
+              className="field-base min-h-[80px] resize-y"
+            />
+          </div>
           {editError && <p className="text-sm text-red-600">{editError}</p>}
           <div className="flex gap-2">
             <Button
