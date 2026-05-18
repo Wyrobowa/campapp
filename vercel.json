@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm ci --legacy-peer-deps --include=dev",
+  "installCommand": "npm install --legacy-peer-deps --include=dev",
   "buildCommand": "npm run build -w apps/web",
   "outputDirectory": "apps/web/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
