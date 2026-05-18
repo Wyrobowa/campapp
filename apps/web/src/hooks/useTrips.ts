@@ -13,6 +13,17 @@ export function useTrips() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['trips'] });
 
+  const applyOptimistic = async (updater: (old: Trip[]) => Trip[]) => {
+    await qc.cancelQueries({ queryKey: ['trips'] });
+    const prev = qc.getQueryData<Trip[]>(['trips']);
+    qc.setQueryData<Trip[]>(['trips'], (old = []) => updater(old));
+    return { prev };
+  };
+
+  const rollback = (_err: unknown, _vars: unknown, ctx: { prev?: Trip[] } | undefined) => {
+    if (ctx?.prev) qc.setQueryData(['trips'], ctx.prev);
+  };
+
   const createTrip = useMutation({
     mutationFn: (vars: {
       data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>;
@@ -43,15 +54,38 @@ export function useTrips() {
       );
       return tripsApi.update(vars.trip.id, { items });
     },
-    onSuccess: invalidate,
+    onMutate: (vars) =>
+      applyOptimistic((old) =>
+        old.map((t) =>
+          t.id !== vars.trip.id
+            ? t
+            : {
+                ...t,
+                items: t.items.map((item) =>
+                  item.id === vars.itemId ? { ...item, packed: !item.packed } : item
+                ),
+              }
+        )
+      ),
+    onError: rollback,
+    onSettled: invalidate,
   });
 
   const addItem = useMutation({
-    mutationFn: (vars: { trip: Trip; item: Omit<GearItem, 'id'> }) => {
-      const items = [...vars.trip.items, { ...vars.item, id: generateId() }];
+    mutationFn: (vars: { trip: Trip; item: Omit<GearItem, 'id'>; newId: string }) => {
+      const items = [...vars.trip.items, { ...vars.item, id: vars.newId }];
       return tripsApi.update(vars.trip.id, { items });
     },
-    onSuccess: invalidate,
+    onMutate: (vars) =>
+      applyOptimistic((old) =>
+        old.map((t) =>
+          t.id !== vars.trip.id
+            ? t
+            : { ...t, items: [...t.items, { ...vars.item, id: vars.newId }] }
+        )
+      ),
+    onError: rollback,
+    onSettled: invalidate,
   });
 
   const removeItem = useMutation({
@@ -59,7 +93,14 @@ export function useTrips() {
       const items = vars.trip.items.filter((i) => i.id !== vars.itemId);
       return tripsApi.update(vars.trip.id, { items });
     },
-    onSuccess: invalidate,
+    onMutate: (vars) =>
+      applyOptimistic((old) =>
+        old.map((t) =>
+          t.id !== vars.trip.id ? t : { ...t, items: t.items.filter((i) => i.id !== vars.itemId) }
+        )
+      ),
+    onError: rollback,
+    onSettled: invalidate,
   });
 
   return {
@@ -70,9 +111,17 @@ export function useTrips() {
       items: Omit<GearItem, 'packed'>[]
     ) => createTrip.mutateAsync({ data, items }),
     updateTrip: (id: string, patch: Partial<Trip>) => updateTrip.mutateAsync({ id, patch }),
-    deleteTrip: (id: string) => { deleteTrip.mutate(id); },
-    toggleItem: (trip: Trip, itemId: string) => { toggleItem.mutate({ trip, itemId }); },
-    addItem: (trip: Trip, item: Omit<GearItem, 'id'>) => { addItem.mutate({ trip, item }); },
-    removeItem: (trip: Trip, itemId: string) => { removeItem.mutate({ trip, itemId }); },
+    deleteTrip: (id: string) => {
+      deleteTrip.mutate(id);
+    },
+    toggleItem: (trip: Trip, itemId: string) => {
+      toggleItem.mutate({ trip, itemId });
+    },
+    addItem: (trip: Trip, item: Omit<GearItem, 'id'>) => {
+      addItem.mutate({ trip, item, newId: generateId() });
+    },
+    removeItem: (trip: Trip, itemId: string) => {
+      removeItem.mutate({ trip, itemId });
+    },
   };
 }
