@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -87,6 +87,14 @@ export function Login() {
           <Button type="submit" disabled={loading} className="w-full justify-center mt-1">
             {loading ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
           </Button>
+
+          {mode === 'signin' && (
+            <p className="text-center text-xs text-gray-400">
+              <Link to="/forgot-password" className="hover:text-gray-600">
+                Forgot password?
+              </Link>
+            </p>
+          )}
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">
