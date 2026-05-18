@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
+import { accountApi } from '../lib/api';
 import { Input } from '../components/ui/Input';
 
 export function Account() {
@@ -60,6 +61,21 @@ export function Account() {
   const handleSignOut = async () => {
     await authClient.signOut();
     void navigate({ to: '/' });
+  };
+
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await accountApi.deleteAccount();
+      await authClient.signOut();
+      void navigate({ to: '/' });
+    } catch {
+      setDeletingAccount(false);
+      setConfirmDelete(false);
+    }
   };
 
   return (
@@ -154,6 +170,45 @@ export function Account() {
       >
         Sign out
       </button>
+
+      <div className="mt-12 pt-6 border-t border-gray-100">
+        <h2 className="text-base font-semibold text-red-600 mb-2">Danger zone</h2>
+        {confirmDelete ? (
+          <div className="bg-red-50 rounded-xl p-4 flex flex-col gap-3">
+            <p className="text-sm text-red-700">
+              This will permanently delete your account and all trips. Are you sure?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setConfirmDelete(false);
+                }}
+                className="btn-secondary flex-1 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  void handleDeleteAccount();
+                }}
+                disabled={deletingAccount}
+                className="flex-1 text-sm bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingAccount ? 'Deleting…' : 'Yes, delete everything'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setConfirmDelete(true);
+            }}
+            className="text-sm text-red-500 hover:text-red-700 font-medium"
+          >
+            Delete account
+          </button>
+        )}
+      </div>
     </div>
   );
 }

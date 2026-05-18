@@ -49,3 +49,9 @@ export const templatesApi = {
     request<Template>(`/api/templates/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   delete: (id: string) => request<{ ok: boolean }>(`/api/templates/${id}`, { method: 'DELETE' }),
 };
+
+// ── ACCOUNT ───────────────────────────────────────────────────────
+
+export const accountApi = {
+  deleteAccount: () => request<{ ok: boolean }>('/api/account', { method: 'DELETE' }),
+};
