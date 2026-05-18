@@ -1,6 +1,22 @@
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { authClient } from '../../lib/auth-client';
 import { Login } from '../../pages/Login';
+
+function useSlowLoad(isLoading: boolean, delayMs = 4000) {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!isLoading) return;
+    const t = setTimeout(() => {
+      setSlow(true);
+    }, delayMs);
+    return () => {
+      clearTimeout(t);
+      setSlow(false);
+    };
+  }, [isLoading, delayMs]);
+  return slow;
+}
 
 function NavBar() {
   const { pathname } = useLocation();
@@ -60,11 +76,15 @@ function NavBar() {
 
 export function RootLayout() {
   const { data: session, isPending } = authClient.useSession();
+  const slow = useSlowLoad(isPending);
 
   if (isPending) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
-        <p className="text-sm text-gray-400">Loading…</p>
+        <div className="text-center">
+          <p className="text-sm text-gray-400">Loading…</p>
+          {slow && <p className="text-xs text-amber-500 mt-2">Server is waking up, please wait…</p>}
+        </div>
       </div>
     );
   }

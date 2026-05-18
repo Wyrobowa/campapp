@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { useTemplates } from '../hooks/useTemplates';
 import { TemplateCard } from '../components/templates/TemplateCard';
 import { TemplateCreator } from '../components/templates/TemplateCreator';
+import { TemplateEditor } from '../components/templates/TemplateEditor';
 import { Button } from '../components/ui/Button';
+import type { Template } from '../types';
 import type { GeneratedItem } from '../data/templateGenerator';
 
 export function Templates() {
-  const { templates, isLoading, isError, deleteTemplate, createTemplate } = useTemplates();
+  const { templates, isLoading, isError, deleteTemplate, createTemplate, updateTemplate } =
+    useTemplates();
   const [showCreator, setShowCreator] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
 
   const handleSave = (name: string, items: GeneratedItem[]) => {
     void createTemplate({ name }, items);
@@ -20,6 +24,21 @@ export function Templates() {
         onSave={handleSave}
         onCancel={() => {
           setShowCreator(false);
+        }}
+      />
+    );
+  }
+
+  if (editingTemplate) {
+    return (
+      <TemplateEditor
+        template={editingTemplate}
+        onSave={async (id, patch) => {
+          await updateTemplate(id, patch);
+          setEditingTemplate(null);
+        }}
+        onCancel={() => {
+          setEditingTemplate(null);
         }}
       />
     );
@@ -72,6 +91,9 @@ export function Templates() {
                   <TemplateCard
                     key={template.id}
                     template={template}
+                    onEdit={() => {
+                      setEditingTemplate(template);
+                    }}
                     onDelete={() => {
                       deleteTemplate(template.id);
                     }}

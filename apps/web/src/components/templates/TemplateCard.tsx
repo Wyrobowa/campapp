@@ -5,10 +5,11 @@ import { Button } from '../ui/Button';
 interface TemplateCardProps {
   template: Template;
   onUse?: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
 }
 
-export function TemplateCard({ template, onUse, onDelete }: TemplateCardProps) {
+export function TemplateCard({ template, onUse, onEdit, onDelete }: TemplateCardProps) {
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -27,6 +28,11 @@ export function TemplateCard({ template, onUse, onDelete }: TemplateCardProps) {
         {onUse && (
           <Button size="sm" onClick={onUse}>
             Use template
+          </Button>
+        )}
+        {!template.isDefault && onEdit && (
+          <Button size="sm" variant="secondary" onClick={onEdit}>
+            Edit
           </Button>
         )}
         {!template.isDefault && onDelete && (

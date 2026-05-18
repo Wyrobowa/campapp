@@ -1,14 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
+import { Input } from '../components/ui/Input';
 
 export function Account() {
+  const navigate = useNavigate();
   const { data: session } = authClient.useSession();
+
   const [name, setName] = useState(session?.user.name ?? '');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const handleSave = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPw, setChangingPw] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSaved, setPwSaved] = useState(false);
+
+  const handleSaveName = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     setSaveError('');
@@ -23,8 +34,32 @@ export function Account() {
     }
   };
 
+  const handleChangePassword = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setPwError('Passwords do not match');
+      return;
+    }
+    setChangingPw(true);
+    setPwError('');
+    setPwSaved(false);
+    try {
+      const { error } = await authClient.changePassword({ currentPassword, newPassword });
+      if (error) throw new Error(error.message ?? 'Failed to change password');
+      setPwSaved(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : 'Failed to change password');
+    } finally {
+      setChangingPw(false);
+    }
+  };
+
   const handleSignOut = async () => {
     await authClient.signOut();
+    void navigate({ to: '/' });
   };
 
   return (
@@ -33,7 +68,7 @@ export function Account() {
 
       <form
         onSubmit={(e) => {
-          void handleSave(e);
+          void handleSaveName(e);
         }}
         className="space-y-4 mb-8"
       >
@@ -61,6 +96,53 @@ export function Account() {
           className="btn-primary w-full"
         >
           {saving ? 'Saving…' : 'Save'}
+        </button>
+      </form>
+
+      <h2 className="text-base font-semibold mb-4">Change password</h2>
+      <form
+        onSubmit={(e) => {
+          void handleChangePassword(e);
+        }}
+        className="space-y-4 mb-8"
+      >
+        <Input
+          label="Current password"
+          type="password"
+          value={currentPassword}
+          onChange={(e) => {
+            setCurrentPassword(e.target.value);
+            setPwSaved(false);
+          }}
+          placeholder="••••••••"
+          required
+        />
+        <Input
+          label="New password"
+          type="password"
+          value={newPassword}
+          onChange={(e) => {
+            setNewPassword(e.target.value);
+            setPwSaved(false);
+          }}
+          placeholder="••••••••"
+          required
+        />
+        <Input
+          label="Confirm new password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            setPwSaved(false);
+          }}
+          placeholder="••••••••"
+          required
+        />
+        {pwError && <p className="text-sm text-red-500">{pwError}</p>}
+        {pwSaved && <p className="text-sm text-forest">Password changed.</p>}
+        <button type="submit" disabled={changingPw} className="btn-primary w-full">
+          {changingPw ? 'Saving…' : 'Change password'}
         </button>
       </form>
 
