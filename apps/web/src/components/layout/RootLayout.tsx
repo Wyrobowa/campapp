@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { authClient } from '../../lib/auth-client';
 import { Login } from '../../pages/Login';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 function useSlowLoad(isLoading: boolean, delayMs = 4000) {
   const [slow, setSlow] = useState(false);
@@ -78,6 +79,7 @@ export function RootLayout() {
   const { pathname } = useLocation();
   const { data: session, isPending } = authClient.useSession();
   const slow = useSlowLoad(isPending);
+  const { canInstall, install, dismiss } = usePWAInstall();
 
   if (pathname.startsWith('/share/')) {
     return <Outlet />;
@@ -100,6 +102,24 @@ export function RootLayout() {
 
   return (
     <div className="min-h-screen bg-bg">
+      {canInstall && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-forest text-white px-4 py-2.5 flex items-center justify-between gap-3 shadow-md">
+          <p className="text-sm">Add CampApp to your home screen for the best experience.</p>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={() => {
+                void install();
+              }}
+              className="text-xs font-semibold bg-white text-forest px-3 py-1 rounded-full"
+            >
+              Install
+            </button>
+            <button onClick={dismiss} className="text-xs text-white/70 hover:text-white px-1">
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       <Outlet />
       <NavBar />
       <div className="h-16" />
