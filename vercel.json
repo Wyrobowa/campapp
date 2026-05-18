@@ -2,5 +2,8 @@
   "installCommand": "rm -f package-lock.json && npm install --legacy-peer-deps --include=dev",
   "buildCommand": "npm run build -w apps/web",
   "outputDirectory": "apps/web/dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://campapp-wpws.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

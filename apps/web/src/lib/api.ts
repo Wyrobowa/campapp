@@ -1,6 +1,6 @@
 import type { Trip, Template, GearItem } from '../types';
 
-const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:3000';
+const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
