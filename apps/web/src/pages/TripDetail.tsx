@@ -10,11 +10,11 @@ import {
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
-import type { GearCategory, Trip } from '../types';
+import type { Trip } from '../types';
 import { useTrips } from '../hooks/useTrips';
 import { useTemplates } from '../hooks/useTemplates';
 import { useEditableTrip } from '../hooks/useEditableTrip';
-import { CATEGORIES } from '../data/categories';
+import { CATEGORIES, getCategoryDisplay } from '../data/categories';
 import { CategoryGroup } from '../components/checklist/CategoryGroup';
 import { AddItemForm } from '../components/checklist/AddItemForm';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -62,15 +62,28 @@ function TripDetailView({ trip }: { trip: Trip }) {
 
   const packed = trip.items.filter((i) => i.packed).length;
 
-  const itemsByCategory = CATEGORIES.reduce<Record<GearCategory, typeof trip.items>>(
+  const allCategories = [...new Set(trip.items.map((i) => i.category))];
+  const orderedCategories = [
+    ...CATEGORIES.filter((c) => allCategories.includes(c.id)).map((c) => c.id),
+    ...allCategories.filter((id) => !CATEGORIES.some((c) => c.id === id)),
+  ];
+  const itemsByCategory = orderedCategories.reduce<Record<string, typeof trip.items>>(
     (acc, cat) => {
-      acc[cat.id] = trip.items.filter((i) => i.category === cat.id);
+      acc[cat] = trip.items.filter((i) => i.category === cat);
       return acc;
     },
-    {} as Record<GearCategory, typeof trip.items>
+    {}
   );
 
-  const categoriesWithItems = CATEGORIES.filter((c) => itemsByCategory[c.id].length > 0);
+  const totalWeightG = trip.items.reduce((sum, item) => {
+    if (item.weight == null) return sum;
+    const g = item.weightUnit === 'oz' ? item.weight * 28.3495 : item.weight;
+    return sum + g * item.quantity;
+  }, 0);
+
+  const categoriesWithItems = orderedCategories.filter(
+    (id) => (itemsByCategory[id]?.length ?? 0) > 0
+  );
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -85,12 +98,14 @@ function TripDetailView({ trip }: { trip: Trip }) {
       lines.push(trip.notes, '');
     }
     lines.push(`Progress: ${packed}/${trip.items.length} packed`, '');
-    categoriesWithItems.forEach((cat) => {
-      lines.push(cat.label.toUpperCase());
-      itemsByCategory[cat.id].forEach((item) => {
+    categoriesWithItems.forEach((catId) => {
+      const catDisplay = getCategoryDisplay(catId);
+      lines.push(catDisplay.label.toUpperCase());
+      (itemsByCategory[catId] ?? []).forEach((item) => {
         lines.push(
-          `${item.packed ? '[x]' : '[ ]'} ${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ''}`
+          `${item.packed ? '[x]' : '[ ]'} ${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ''}${item.weight != null ? ` (${item.weight}${item.weightUnit ?? 'g'})` : ''}`
         );
+        if (item.notes) lines.push(`  → ${item.notes}`);
       });
       lines.push('');
     });
@@ -237,6 +252,13 @@ function TripDetailView({ trip }: { trip: Trip }) {
       {trip.items.length > 0 && (
         <div className="mb-6">
           <ProgressBar packed={packed} total={trip.items.length} />
+          {totalWeightG > 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              {totalWeightG >= 1000
+                ? `${(totalWeightG / 1000).toFixed(2)} kg total`
+                : `${Math.round(totalWeightG)} g total`}
+            </p>
+          )}
           <div className="flex gap-2 mt-2">
             {packed < trip.items.length && (
               <button
@@ -270,11 +292,11 @@ function TripDetailView({ trip }: { trip: Trip }) {
       )}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        {categoriesWithItems.map((cat) => (
+        {categoriesWithItems.map((catId) => (
           <CategoryGroup
-            key={cat.id}
-            category={cat.id}
-            items={itemsByCategory[cat.id]}
+            key={catId}
+            category={catId}
+            items={itemsByCategory[catId] ?? []}
             onToggle={(itemId) => {
               toggleItem(trip, itemId);
             }}
