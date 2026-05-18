@@ -91,6 +91,7 @@ const DEFAULT_TEMPLATES = [
   },
 ] as const;
 
+const now = new Date();
 const rows = DEFAULT_TEMPLATES.map((t) => ({
   id: t.id,
   userId: null,
@@ -98,6 +99,8 @@ const rows = DEFAULT_TEMPLATES.map((t) => ({
   description: t.description,
   items: t.items,
   isDefault: true,
+  createdAt: now,
+  updatedAt: now,
 }));
 
 await db.insert(templates).values(rows).onConflictDoNothing();

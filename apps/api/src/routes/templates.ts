@@ -38,6 +38,7 @@ router.get('/', async (c) => {
 router.post('/', zValidator('json', createSchema), async (c) => {
   const userId = c.get('userId');
   const body = c.req.valid('json');
+  const now = new Date();
   const [template] = await db
     .insert(templates)
     .values({
@@ -47,6 +48,8 @@ router.post('/', zValidator('json', createSchema), async (c) => {
       description: body.description,
       items: body.items,
       isDefault: false,
+      createdAt: now,
+      updatedAt: now,
     })
     .returning();
   return c.json(template, 201);
@@ -74,7 +77,7 @@ router.put('/:id', zValidator('json', updateSchema), async (c) => {
   const body = c.req.valid('json');
   const [template] = await db
     .update(templates)
-    .set(body)
+    .set({ ...body, updatedAt: new Date() })
     .where(and(eq(templates.id, id), eq(templates.userId, userId)))
     .returning();
   if (!template) return c.json({ error: 'Not found' }, 404);

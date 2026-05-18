@@ -32,6 +32,8 @@ export const TemplateSchema = z.object({
   description: z.string().optional(),
   items: z.array(TemplateItemSchema),
   isDefault: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 // ── TRIP ──────────────────────────────────────────────────────────

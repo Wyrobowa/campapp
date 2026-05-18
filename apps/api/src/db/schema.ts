@@ -69,4 +69,6 @@ export const templates = pgTable('templates', {
   description: text('description'),
   items:       jsonb('items').notNull().default([]),
   isDefault:   boolean('is_default').notNull().default(false),
+  createdAt:   timestamp('created_at', { withTimezone: true }).notNull(),
+  updatedAt:   timestamp('updated_at', { withTimezone: true }).notNull(),
 });
