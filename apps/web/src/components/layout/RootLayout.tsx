@@ -1,10 +1,9 @@
-import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { authClient } from '../../lib/auth-client';
 import { Login } from '../../pages/Login';
 
 function NavBar() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const tripsActive = pathname === '/' || pathname.startsWith('/trips');
   const templatesActive = pathname.startsWith('/templates');
 
@@ -13,7 +12,6 @@ function NavBar() {
 
   const handleSignOut = async () => {
     await authClient.signOut();
-    void navigate({ to: '/login' });
   };
 
   return (

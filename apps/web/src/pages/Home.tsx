@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button';
 
 export function Home() {
   const navigate = useNavigate();
-  const { trips, createTrip, deleteTrip } = useTrips();
+  const { trips, isLoading, createTrip, deleteTrip } = useTrips();
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
 
@@ -52,7 +52,16 @@ export function Home() {
         </div>
       )}
 
-      {trips.length === 0 && !showForm ? (
+      {isLoading ? (
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-20 bg-white rounded-2xl border border-gray-100 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : trips.length === 0 && !showForm ? (
         <div className="text-center py-16">
           <p className="text-4xl mb-3">⛺</p>
           <p className="text-gray-500 text-sm">No trips yet — create your first one!</p>
