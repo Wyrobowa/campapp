@@ -1,3 +1,5 @@
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { GearItem } from '../../types';
 
 interface ChecklistItemProps {
@@ -7,8 +9,35 @@ interface ChecklistItemProps {
 }
 
 export function ChecklistItem({ item, onToggle, onRemove }: ChecklistItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
-    <li className="flex items-center gap-3 py-2.5 px-1 group">
+    <li ref={setNodeRef} style={style} className="flex items-center gap-3 py-2.5 px-1 group">
+      <button
+        {...attributes}
+        {...listeners}
+        className="text-gray-200 hover:text-gray-400 active:text-gray-400 cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
+        aria-label="Drag to reorder"
+        tabIndex={-1}
+      >
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="5" cy="4" r="1.2" />
+          <circle cx="11" cy="4" r="1.2" />
+          <circle cx="5" cy="8" r="1.2" />
+          <circle cx="11" cy="8" r="1.2" />
+          <circle cx="5" cy="12" r="1.2" />
+          <circle cx="11" cy="12" r="1.2" />
+        </svg>
+      </button>
+
       <button
         onClick={() => {
           onToggle(item.id);

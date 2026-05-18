@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import type { GearItem, GearCategory } from '../../types';
 import { CATEGORY_MAP } from '../../data/categories';
 import { ChecklistItem } from './ChecklistItem';
@@ -46,11 +47,13 @@ export function CategoryGroup({ category, items, onToggle, onRemove }: CategoryG
       </button>
 
       {!collapsed && (
-        <ul className="divide-y divide-gray-100 pl-1">
-          {items.map((item) => (
-            <ChecklistItem key={item.id} item={item} onToggle={onToggle} onRemove={onRemove} />
-          ))}
-        </ul>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          <ul className="divide-y divide-gray-100 pl-1">
+            {items.map((item) => (
+              <ChecklistItem key={item.id} item={item} onToggle={onToggle} onRemove={onRemove} />
+            ))}
+          </ul>
+        </SortableContext>
       )}
     </div>
   );
