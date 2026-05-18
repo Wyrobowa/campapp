@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --legacy-peer-deps --include=dev && npm rebuild rolldown",
+  "installCommand": "npm install --legacy-peer-deps --include=dev && npm install @rolldown/binding-linux-x64-gnu@1.0.1 --no-save --legacy-peer-deps",
   "buildCommand": "npm run build -w apps/web",
   "outputDirectory": "apps/web/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
