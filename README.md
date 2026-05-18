@@ -226,6 +226,25 @@ npm run dev        # web → http://localhost:5173  api → http://localhost:300
 | `npm run db:seed` | Seed default templates |
 | `npm run db:studio` | Open Drizzle Studio |
 
+## Deployment
+
+### API → Railway
+
+1. Create a new Railway project and connect the GitHub repo.
+2. Leave the root directory as the repo root — `railway.json` defines the build and start commands.
+3. Add environment variables in Railway settings (same as `apps/api/.env`).
+4. After first deploy, run the seed script once:
+   ```bash
+   railway run node apps/api/dist/db/seed.js
+   ```
+
+### Web → Vercel
+
+1. Import the GitHub repo in Vercel.
+2. Set **Root Directory** to `apps/web`.
+3. Vercel auto-detects Vite; `vercel.json` adds the SPA rewrite so deep links work.
+4. Add `VITE_API_URL` pointing to your Railway API URL in Vercel's environment settings.
+
 ## Conventions
 
 - **Conventional Commits** — `feat:`, `fix:`, `refactor:`, `chore:`, etc.
