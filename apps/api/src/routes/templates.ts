@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { and, eq, isNull, or } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
+import { TemplateItemSchema } from '@campapp/shared';
 import { db } from '../db/index.js';
 import { templates } from '../db/schema.js';
 import { requireSession } from '../middleware/session.js';
@@ -10,25 +11,16 @@ import type { AppVariables } from '../types.js';
 
 const router = new Hono<{ Variables: AppVariables }>();
 
-const gearItemSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  category: z.string(),
-  quantity: z.number().int().min(1),
-  packed: z.boolean(),
-  notes: z.string().optional(),
-});
-
 const createSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  items: z.array(gearItemSchema).default([]),
+  items: z.array(TemplateItemSchema).default([]),
 });
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
-  items: z.array(gearItemSchema).optional(),
+  items: z.array(TemplateItemSchema).optional(),
 });
 
 router.use('/*', requireSession);

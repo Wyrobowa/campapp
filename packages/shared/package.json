@@ -1,0 +1,15 @@
+{
+  "name": "@campapp/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "zod": ">=3.0.0 || >=4.0.0"
+  }
+}
