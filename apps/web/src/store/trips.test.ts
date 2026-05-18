@@ -155,7 +155,9 @@ describe('useTripsStore – addItem / removeItem', () => {
         { name: 'Items test', date: '2025-08-01', notes: undefined, templateId: undefined },
         []
       );
-    useTripsStore.getState().addItem(trip.id, { name: 'Lantern', category: 'tools', quantity: 1 });
+    useTripsStore
+      .getState()
+      .addItem(trip.id, { name: 'Lantern', category: 'tools', quantity: 1, packed: false });
     const updated = useTripsStore.getState().trips.find((t) => t.id === trip.id);
     expect(updated?.items).toHaveLength(1);
     expect(updated?.items[0]?.name).toBe('Lantern');
