@@ -58,6 +58,7 @@ export const trips = pgTable('trips', {
   notes:      text('notes'),
   templateId: text('template_id'),
   items:      jsonb('items').notNull().default([]),
+  shareToken: text('share_token').unique(),
   createdAt:  timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt:  timestamp('updated_at', { withTimezone: true }).notNull(),
 });

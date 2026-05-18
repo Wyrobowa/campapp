@@ -6,6 +6,7 @@ import { auth } from './auth.js';
 import { tripsRouter } from './routes/trips.js';
 import { templatesRouter } from './routes/templates.js';
 import { accountRouter } from './routes/account.js';
+import { shareRouter } from './routes/share.js';
 import type { AppVariables } from './types.js';
 
 const app = new Hono<{ Variables: AppVariables }>();
@@ -25,6 +26,7 @@ app.on(['GET', 'POST'], '/api/auth/**', (c) => auth.handler(c.req.raw));
 app.route('/api/trips', tripsRouter);
 app.route('/api/templates', templatesRouter);
 app.route('/api/account', accountRouter);
+app.route('/api/share', shareRouter);
 
 const port = Number(process.env.PORT ?? 3000);
 serve({ fetch: app.fetch, port }, () => {

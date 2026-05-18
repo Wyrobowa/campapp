@@ -42,9 +42,10 @@ export const TripSchema = z.object({
   id: z.string(),
   name: z.string(),
   date: z.string(),
-  templateId: z.string().optional(),
+  templateId: z.string().nullable().optional(),
   items: z.array(GearItemSchema),
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
+  shareToken: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

@@ -75,8 +75,13 @@ function NavBar() {
 }
 
 export function RootLayout() {
+  const { pathname } = useLocation();
   const { data: session, isPending } = authClient.useSession();
   const slow = useSlowLoad(isPending);
+
+  if (pathname.startsWith('/share/')) {
+    return <Outlet />;
+  }
 
   if (isPending) {
     return (

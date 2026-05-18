@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import type { GearCategory, Trip } from '../types';
 import { useTrips } from '../hooks/useTrips';
@@ -16,7 +26,8 @@ const Route = getRouteApi('/trips/$tripId');
 
 function TripDetailView({ trip }: { trip: Trip }) {
   const navigate = useNavigate();
-  const { toggleItem, addItem, removeItem, setAllPacked } = useTrips();
+  const { toggleItem, addItem, removeItem, setAllPacked, reorderItems, shareTrip, unshareTrip } =
+    useTrips();
   const { createTemplateFromTrip } = useTemplates();
   const {
     editing,
@@ -35,6 +46,20 @@ function TripDetailView({ trip }: { trip: Trip }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = trip.items.findIndex((i) => i.id === active.id);
+    const newIndex = trip.items.findIndex((i) => i.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    reorderItems(trip, arrayMove(trip.items, oldIndex, newIndex));
+  };
+
   const packed = trip.items.filter((i) => i.packed).length;
 
   const itemsByCategory = CATEGORIES.reduce<Record<GearCategory, typeof trip.items>>(
@@ -52,6 +77,56 @@ function TripDetailView({ trip }: { trip: Trip }) {
     setTimeout(() => {
       setToast(null);
     }, 2500);
+  };
+
+  const handleExport = () => {
+    const lines: string[] = [trip.name, `Date: ${formatDate(trip.date)}`, ''];
+    if (trip.notes) {
+      lines.push(trip.notes, '');
+    }
+    lines.push(`Progress: ${packed}/${trip.items.length} packed`, '');
+    categoriesWithItems.forEach((cat) => {
+      lines.push(cat.label.toUpperCase());
+      itemsByCategory[cat.id].forEach((item) => {
+        lines.push(
+          `${item.packed ? '[x]' : '[ ]'} ${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ''}`
+        );
+      });
+      lines.push('');
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${trip.name}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShare = async () => {
+    if (trip.shareToken) {
+      const url = `${window.location.origin}/share/${trip.shareToken}`;
+      await navigator.clipboard.writeText(url).catch(() => null);
+      showToast('Link copied!');
+    } else {
+      try {
+        const { shareToken } = await shareTrip(trip.id);
+        const url = `${window.location.origin}/share/${shareToken}`;
+        await navigator.clipboard.writeText(url).catch(() => null);
+        showToast('Sharing enabled — link copied!');
+      } catch {
+        showToast('Failed to enable sharing.');
+      }
+    }
+  };
+
+  const handleUnshare = async () => {
+    try {
+      await unshareTrip(trip.id);
+      showToast('Sharing disabled.');
+    } catch {
+      showToast('Failed to disable sharing.');
+    }
   };
 
   const handleSaveAsTemplate = async () => {
@@ -194,19 +269,21 @@ function TripDetailView({ trip }: { trip: Trip }) {
         </div>
       )}
 
-      {categoriesWithItems.map((cat) => (
-        <CategoryGroup
-          key={cat.id}
-          category={cat.id}
-          items={itemsByCategory[cat.id]}
-          onToggle={(itemId) => {
-            toggleItem(trip, itemId);
-          }}
-          onRemove={(itemId) => {
-            removeItem(trip, itemId);
-          }}
-        />
-      ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        {categoriesWithItems.map((cat) => (
+          <CategoryGroup
+            key={cat.id}
+            category={cat.id}
+            items={itemsByCategory[cat.id]}
+            onToggle={(itemId) => {
+              toggleItem(trip, itemId);
+            }}
+            onRemove={(itemId) => {
+              removeItem(trip, itemId);
+            }}
+          />
+        ))}
+      </DndContext>
 
       <div className="mt-4">
         {showAddForm ? (
@@ -239,20 +316,47 @@ function TripDetailView({ trip }: { trip: Trip }) {
         )}
       </div>
 
-      {trip.items.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
+      <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
+        {trip.items.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                void handleSaveAsTemplate();
+              }}
+              className="text-gray-500"
+            >
+              Save as template
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleExport} className="text-gray-500">
+              Export
+            </Button>
+          </div>
+        )}
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
-              void handleSaveAsTemplate();
+              void handleShare();
             }}
             className="text-gray-500"
           >
-            Save as template
+            {trip.shareToken ? 'Copy link' : 'Share trip'}
           </Button>
+          {trip.shareToken && (
+            <button
+              onClick={() => {
+                void handleUnshare();
+              }}
+              className="text-xs text-gray-400 hover:text-red-500"
+            >
+              Stop sharing
+            </button>
+          )}
         </div>
-      )}
+      </div>
 
       {toast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2.5 rounded-full shadow-lg pointer-events-none z-50 animate-fade-in">

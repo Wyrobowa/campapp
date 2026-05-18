@@ -8,6 +8,7 @@ import {
   LazyAccount,
   LazyForgotPassword,
   LazyResetPassword,
+  LazyShareTrip,
 } from './pages/lazy';
 
 const rootRoute = createRootRoute({ component: RootLayout });
@@ -75,6 +76,16 @@ const resetPasswordRoute = createRoute({
   ),
 });
 
+const shareTripRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/share/$token',
+  component: () => (
+    <PageSuspense>
+      <LazyShareTrip />
+    </PageSuspense>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   tripRoute,
@@ -82,6 +93,7 @@ const routeTree = rootRoute.addChildren([
   accountRoute,
   forgotPasswordRoute,
   resetPasswordRoute,
+  shareTripRoute,
 ]);
 
 export const router = createRouter({ routeTree });

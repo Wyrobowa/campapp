@@ -50,6 +50,18 @@ export const templatesApi = {
   delete: (id: string) => request<{ ok: boolean }>(`/api/templates/${id}`, { method: 'DELETE' }),
 };
 
+// ── SHARE ─────────────────────────────────────────────────────────
+
+export type SharedTrip = Pick<Trip, 'id' | 'name' | 'date' | 'notes' | 'items'>;
+
+export const shareApi = {
+  create: (tripId: string) =>
+    request<{ shareToken: string }>(`/api/trips/${tripId}/share`, { method: 'POST' }),
+  remove: (tripId: string) =>
+    request<{ ok: boolean }>(`/api/trips/${tripId}/share`, { method: 'DELETE' }),
+  get: (token: string) => request<SharedTrip>(`/api/share/${token}`),
+};
+
 // ── ACCOUNT ───────────────────────────────────────────────────────
 
 export const accountApi = {

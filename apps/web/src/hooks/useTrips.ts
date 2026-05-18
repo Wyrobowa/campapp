@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { tripsApi } from '../lib/api';
+import { tripsApi, shareApi } from '../lib/api';
 import type { Trip, GearItem } from '../types';
 import { generateId } from '../utils/id';
 
@@ -123,6 +123,27 @@ export function useTrips() {
     onSuccess: invalidate,
   });
 
+  const reorderItems = useMutation({
+    mutationFn: (vars: { trip: Trip; items: GearItem[] }) =>
+      tripsApi.update(vars.trip.id, { items: vars.items }),
+    onMutate: (vars) =>
+      applyOptimistic((old) =>
+        old.map((t) => (t.id !== vars.trip.id ? t : { ...t, items: vars.items }))
+      ),
+    onError: rollback,
+    onSettled: invalidate,
+  });
+
+  const shareTrip = useMutation({
+    mutationFn: (tripId: string) => shareApi.create(tripId),
+    onSuccess: invalidate,
+  });
+
+  const unshareTrip = useMutation({
+    mutationFn: (tripId: string) => shareApi.remove(tripId),
+    onSuccess: invalidate,
+  });
+
   const setAllPacked = useMutation({
     mutationFn: (vars: { trip: Trip; packed: boolean }) => {
       const items = vars.trip.items.map((item) => ({ ...item, packed: vars.packed }));
@@ -166,5 +187,10 @@ export function useTrips() {
       setAllPacked.mutate({ trip, packed });
     },
     duplicateTrip: (trip: Trip) => duplicateTrip.mutateAsync(trip),
+    reorderItems: (trip: Trip, items: GearItem[]) => {
+      reorderItems.mutate({ trip, items });
+    },
+    shareTrip: (tripId: string) => shareTrip.mutateAsync(tripId),
+    unshareTrip: (tripId: string) => unshareTrip.mutateAsync(tripId),
   };
 }

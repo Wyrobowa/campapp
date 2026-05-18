@@ -14,3 +14,6 @@ export const LazyForgotPassword = lazy(() =>
 export const LazyResetPassword = lazy(() =>
   import('./ResetPassword').then((m) => ({ default: m.ResetPassword }))
 );
+export const LazyShareTrip = lazy(() =>
+  import('./ShareTrip').then((m) => ({ default: m.ShareTrip }))
+);

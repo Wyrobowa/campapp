@@ -91,4 +91,29 @@ router.delete('/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+router.post('/:id/share', async (c) => {
+  const userId = c.get('userId');
+  const id = c.req.param('id');
+  const shareToken = randomUUID();
+  const [trip] = await db
+    .update(trips)
+    .set({ shareToken, updatedAt: new Date() })
+    .where(and(eq(trips.id, id), eq(trips.userId, userId)))
+    .returning();
+  if (!trip) return c.json({ error: 'Not found' }, 404);
+  return c.json({ shareToken });
+});
+
+router.delete('/:id/share', async (c) => {
+  const userId = c.get('userId');
+  const id = c.req.param('id');
+  const [trip] = await db
+    .update(trips)
+    .set({ shareToken: null, updatedAt: new Date() })
+    .where(and(eq(trips.id, id), eq(trips.userId, userId)))
+    .returning();
+  if (!trip) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true });
+});
+
 export { router as tripsRouter };
