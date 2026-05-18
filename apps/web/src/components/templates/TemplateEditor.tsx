@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { Template, TemplateItem, GearCategory } from '../../types';
-import { CATEGORIES } from '../../data/categories';
+import type { Template, TemplateItem } from '../../types';
+import { CATEGORIES, getCategoryDisplay } from '../../data/categories';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
@@ -21,18 +21,39 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
   const [error, setError] = useState<string | null>(null);
 
   const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState<GearCategory>('other');
+  const [newCategory, setNewCategory] = useState('other');
+  const [newCustomCategory, setNewCustomCategory] = useState('');
   const [newQty, setNewQty] = useState(1);
+  const [newNotes, setNewNotes] = useState('');
+  const [newWeight, setNewWeight] = useState('');
+  const [newWeightUnit, setNewWeightUnit] = useState<'g' | 'oz'>('g');
+  const [showExtra, setShowExtra] = useState(false);
+
+  const isCustom = newCategory === '__custom__';
+  const effectiveCategory = isCustom ? newCustomCategory.trim() || 'other' : newCategory;
 
   const addItem = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!newName.trim()) return;
+    const parsedWeight = newWeight ? parseFloat(newWeight) : undefined;
     setItems((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), name: newName.trim(), category: newCategory, quantity: newQty },
+      {
+        id: crypto.randomUUID(),
+        name: newName.trim(),
+        category: effectiveCategory,
+        quantity: newQty,
+        notes: newNotes.trim() || undefined,
+        weight: parsedWeight && !isNaN(parsedWeight) ? parsedWeight : undefined,
+        weightUnit: parsedWeight ? newWeightUnit : undefined,
+      },
     ]);
     setNewName('');
     setNewQty(1);
+    setNewNotes('');
+    setNewWeight('');
+    setNewCustomCategory('');
+    setShowExtra(false);
   };
 
   const removeItem = (id: string) => {
@@ -106,24 +127,31 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
       {items.length > 0 && (
         <div className="flex flex-col gap-2 mb-4">
           {items.map((item) => {
-            const cat = CATEGORIES.find((c) => c.id === item.category);
+            const cat = getCategoryDisplay(item.category);
             return (
               <div
                 key={item.id}
                 className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-gray-100"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-base">{cat?.emoji}</span>
-                  <span className="text-sm text-gray-800 truncate">{item.name}</span>
-                  {item.quantity > 1 && (
-                    <span className="text-xs text-gray-400">×{item.quantity}</span>
-                  )}
+                  <span className="text-base">{cat.emoji}</span>
+                  <div className="min-w-0">
+                    <span className="text-sm text-gray-800 truncate block">
+                      {item.name}
+                      {item.quantity > 1 && (
+                        <span className="ml-1 text-xs text-gray-400">×{item.quantity}</span>
+                      )}
+                    </span>
+                    {item.notes && (
+                      <span className="text-xs text-gray-400 truncate block">{item.notes}</span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => {
                     removeItem(item.id);
                   }}
-                  className="text-gray-300 hover:text-red-400 transition-colors ml-3 flex-shrink-0"
+                  className="text-gray-300 hover:text-red-400 ml-3 flex-shrink-0"
                   aria-label="Remove item"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
@@ -157,7 +185,7 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
             <select
               value={newCategory}
               onChange={(e) => {
-                setNewCategory(e.target.value as GearCategory);
+                setNewCategory(e.target.value);
               }}
               className="field-base bg-white"
             >
@@ -166,10 +194,11 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
                   {c.emoji} {c.label}
                 </option>
               ))}
+              <option value="__custom__">✏️ Custom…</option>
             </select>
           </div>
-          <div className="w-24 flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Quantity</label>
+          <div className="w-20 flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Qty</label>
             <input
               type="number"
               min={1}
@@ -181,6 +210,60 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
             />
           </div>
         </div>
+        {isCustom && (
+          <input
+            value={newCustomCategory}
+            onChange={(e) => {
+              setNewCustomCategory(e.target.value);
+            }}
+            placeholder="Category name…"
+            className="field-base"
+          />
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            setShowExtra((v) => !v);
+          }}
+          className="text-xs text-gray-400 hover:text-gray-600 text-left"
+        >
+          {showExtra ? '▲ Hide' : '▼ Notes & weight'}
+        </button>
+        {showExtra && (
+          <>
+            <input
+              value={newNotes}
+              onChange={(e) => {
+                setNewNotes(e.target.value);
+              }}
+              placeholder="Notes (optional)"
+              className="field-base text-sm"
+            />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={0}
+                step="any"
+                value={newWeight}
+                onChange={(e) => {
+                  setNewWeight(e.target.value);
+                }}
+                placeholder="Weight"
+                className="field-base flex-1 text-sm"
+              />
+              <select
+                value={newWeightUnit}
+                onChange={(e) => {
+                  setNewWeightUnit(e.target.value as 'g' | 'oz');
+                }}
+                className="field-base bg-white w-16 text-sm"
+              >
+                <option value="g">g</option>
+                <option value="oz">oz</option>
+              </select>
+            </div>
+          </>
+        )}
         <Button type="submit" className="self-end">
           + Add
         </Button>
