@@ -15,4 +15,10 @@ export const auth = betterAuth({
   }),
   emailAndPassword: { enabled: true },
   trustedOrigins: [process.env.FRONTEND_URL ?? 'http://localhost:5173'],
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: 'none',
+      secure: true,
+    },
+  },
 });
