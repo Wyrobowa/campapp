@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Trip } from '../../types';
 import { ProgressBar } from '../ui/ProgressBar';
-import { formatDate } from '../../utils/date';
+import { formatDate, relativeDate } from '../../utils/date';
 
 interface TripCardProps {
   trip: Trip;
@@ -63,7 +63,12 @@ export function TripCard({ trip, onClick, onDelete }: TripCardProps) {
           </button>
         )}
       </div>
-      <p className="text-xs text-gray-400 mb-3">{formatDate(trip.date)}</p>
+      <p className="text-xs text-gray-400 mb-3">
+        {formatDate(trip.date)}
+        {relativeDate(trip.date) && (
+          <span className="ml-1.5 text-forest/70">{relativeDate(trip.date)}</span>
+        )}
+      </p>
       {trip.items.length > 0 ? (
         <ProgressBar packed={packed} total={trip.items.length} />
       ) : (

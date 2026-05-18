@@ -10,7 +10,7 @@ import { AddItemForm } from '../components/checklist/AddItemForm';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { formatDate } from '../utils/date';
+import { formatDate, relativeDate } from '../utils/date';
 
 const Route = getRouteApi('/trips/$tripId');
 
@@ -118,7 +118,12 @@ function TripDetailView({ trip }: { trip: Trip }) {
         <div className="mb-4 flex items-start justify-between gap-2">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{trip.name}</h1>
-            <p className="text-sm text-gray-400">{formatDate(trip.date)}</p>
+            <p className="text-sm text-gray-400">
+              {formatDate(trip.date)}
+              {relativeDate(trip.date) && (
+                <span className="ml-1.5 text-forest/70">{relativeDate(trip.date)}</span>
+              )}
+            </p>
             {trip.notes && (
               <p className="text-sm text-gray-500 mt-2 whitespace-pre-wrap">{trip.notes}</p>
             )}

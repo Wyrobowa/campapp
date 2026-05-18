@@ -6,9 +6,16 @@ import { generateId } from '../utils/id';
 export function useTrips() {
   const qc = useQueryClient();
 
-  const { data: trips = [], isLoading } = useQuery({
+  const {
+    data: trips = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['trips'],
-    queryFn: tripsApi.list,
+    queryFn: async () => {
+      const data = await tripsApi.list();
+      return [...data].sort((a, b) => a.date.localeCompare(b.date));
+    },
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['trips'] });
@@ -106,6 +113,7 @@ export function useTrips() {
   return {
     trips,
     isLoading,
+    isError,
     createTrip: (
       data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>,
       items: Omit<GearItem, 'packed'>[]
