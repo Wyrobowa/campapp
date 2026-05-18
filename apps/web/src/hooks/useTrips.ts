@@ -110,6 +110,23 @@ export function useTrips() {
     onSettled: invalidate,
   });
 
+  const setAllPacked = useMutation({
+    mutationFn: (vars: { trip: Trip; packed: boolean }) => {
+      const items = vars.trip.items.map((item) => ({ ...item, packed: vars.packed }));
+      return tripsApi.update(vars.trip.id, { items });
+    },
+    onMutate: (vars) =>
+      applyOptimistic((old) =>
+        old.map((t) =>
+          t.id !== vars.trip.id
+            ? t
+            : { ...t, items: t.items.map((item) => ({ ...item, packed: vars.packed })) }
+        )
+      ),
+    onError: rollback,
+    onSettled: invalidate,
+  });
+
   return {
     trips,
     isLoading,
@@ -130,6 +147,9 @@ export function useTrips() {
     },
     removeItem: (trip: Trip, itemId: string) => {
       removeItem.mutate({ trip, itemId });
+    },
+    setAllPacked: (trip: Trip, packed: boolean) => {
+      setAllPacked.mutate({ trip, packed });
     },
   };
 }

@@ -16,7 +16,7 @@ const Route = getRouteApi('/trips/$tripId');
 
 function TripDetailView({ trip }: { trip: Trip }) {
   const navigate = useNavigate();
-  const { toggleItem, addItem, removeItem } = useTrips();
+  const { toggleItem, addItem, removeItem, setAllPacked } = useTrips();
   const { createTemplateFromTrip } = useTemplates();
   const {
     editing,
@@ -162,6 +162,28 @@ function TripDetailView({ trip }: { trip: Trip }) {
       {trip.items.length > 0 && (
         <div className="mb-6">
           <ProgressBar packed={packed} total={trip.items.length} />
+          <div className="flex gap-2 mt-2">
+            {packed < trip.items.length && (
+              <button
+                onClick={() => {
+                  setAllPacked(trip, true);
+                }}
+                className="text-xs text-forest hover:text-forest/80 font-medium"
+              >
+                Pack all
+              </button>
+            )}
+            {packed > 0 && (
+              <button
+                onClick={() => {
+                  setAllPacked(trip, false);
+                }}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                Unpack all
+              </button>
+            )}
+          </div>
         </div>
       )}
 
