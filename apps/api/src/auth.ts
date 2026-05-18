@@ -26,6 +26,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
     sendResetPassword: async ({ user, token }) => {
       const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:5173';
       const url = `${frontendUrl}/reset-password?token=${token}`;
