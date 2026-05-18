@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button';
 
 export function Home() {
   const navigate = useNavigate();
-  const { trips, isLoading, isError, createTrip, deleteTrip } = useTrips();
+  const { trips, isLoading, isError, refetch, createTrip, deleteTrip, duplicateTrip } = useTrips();
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -69,9 +69,17 @@ export function Home() {
       {isError ? (
         <div className="text-center py-12">
           <p className="text-2xl mb-2">⚠️</p>
-          <p className="text-sm text-gray-500">
-            Couldn't load trips. Check your connection and try refreshing.
+          <p className="text-sm text-gray-500 mb-3">
+            Couldn't load trips. The server may be waking up.
           </p>
+          <button
+            onClick={() => {
+              void refetch();
+            }}
+            className="text-sm text-forest font-medium hover:underline"
+          >
+            Try again
+          </button>
         </div>
       ) : isLoading ? (
         <div className="flex flex-col gap-3">
@@ -129,6 +137,9 @@ export function Home() {
                   trip={trip}
                   onClick={() => {
                     void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
+                  }}
+                  onDuplicate={() => {
+                    void duplicateTrip(trip);
                   }}
                   onDelete={() => {
                     deleteTrip(trip.id);

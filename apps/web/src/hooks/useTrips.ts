@@ -10,6 +10,7 @@ export function useTrips() {
     data: trips = [],
     isLoading,
     isError,
+    refetch,
   } = useQuery({
     queryKey: ['trips'],
     queryFn: async () => {
@@ -110,6 +111,18 @@ export function useTrips() {
     onSettled: invalidate,
   });
 
+  const duplicateTrip = useMutation({
+    mutationFn: (trip: Trip) =>
+      tripsApi.create({
+        name: `${trip.name} (copy)`,
+        date: new Date().toISOString().slice(0, 10),
+        templateId: trip.templateId,
+        notes: trip.notes,
+        items: trip.items.map((item) => ({ ...item, packed: false })),
+      }),
+    onSuccess: invalidate,
+  });
+
   const setAllPacked = useMutation({
     mutationFn: (vars: { trip: Trip; packed: boolean }) => {
       const items = vars.trip.items.map((item) => ({ ...item, packed: vars.packed }));
@@ -131,6 +144,7 @@ export function useTrips() {
     trips,
     isLoading,
     isError,
+    refetch,
     createTrip: (
       data: Pick<Trip, 'name' | 'date' | 'notes' | 'templateId'>,
       items: Omit<GearItem, 'packed'>[]
@@ -151,5 +165,6 @@ export function useTrips() {
     setAllPacked: (trip: Trip, packed: boolean) => {
       setAllPacked.mutate({ trip, packed });
     },
+    duplicateTrip: (trip: Trip) => duplicateTrip.mutateAsync(trip),
   };
 }
