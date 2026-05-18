@@ -13,11 +13,17 @@ export function Home() {
   const [showForm, setShowForm] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'upcoming' | 'past'>('upcoming');
+  const [search, setSearch] = useState('');
 
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = trips.filter((t) => t.date >= today);
   const past = trips.filter((t) => t.date < today);
-  const visibleTrips = filter === 'upcoming' ? upcoming : past;
+  const query = search.trim().toLowerCase();
+  const visibleTrips = query
+    ? trips.filter((t) => t.name.toLowerCase().includes(query))
+    : filter === 'upcoming'
+      ? upcoming
+      : past;
 
   const handleCreate = async (data: Parameters<typeof createTrip>[0]) => {
     setCreateError(null);
@@ -97,13 +103,14 @@ export function Home() {
         </div>
       ) : (
         <>
-          <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-4">
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-3">
             <button
               onClick={() => {
                 setFilter('upcoming');
+                setSearch('');
               }}
               className={`flex-1 text-sm font-medium py-1.5 rounded-lg transition-colors ${
-                filter === 'upcoming'
+                filter === 'upcoming' && !query
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
@@ -113,9 +120,10 @@ export function Home() {
             <button
               onClick={() => {
                 setFilter('past');
+                setSearch('');
               }}
               className={`flex-1 text-sm font-medium py-1.5 rounded-lg transition-colors ${
-                filter === 'past'
+                filter === 'past' && !query
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
@@ -123,10 +131,38 @@ export function Home() {
               Past{past.length > 0 ? ` (${past.length})` : ''}
             </button>
           </div>
+          <div className="relative mb-4">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.4" />
+              <path
+                d="M11 11l2.5 2.5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+              placeholder="Search trips…"
+              className="field-base w-full pl-9 text-sm"
+            />
+          </div>
           {visibleTrips.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400 text-sm">
-                {filter === 'upcoming' ? 'No upcoming trips.' : 'No past trips.'}
+                {query
+                  ? 'No trips match your search.'
+                  : filter === 'upcoming'
+                    ? 'No upcoming trips.'
+                    : 'No past trips.'}
               </p>
             </div>
           ) : (
