@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button';
 
 export function Home() {
   const navigate = useNavigate();
-  const { trips, isLoading, createTrip, deleteTrip } = useTrips();
+  const { trips, isLoading, isError, createTrip, deleteTrip } = useTrips();
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -60,7 +60,14 @@ export function Home() {
         </div>
       )}
 
-      {isLoading ? (
+      {isError ? (
+        <div className="text-center py-12">
+          <p className="text-2xl mb-2">⚠️</p>
+          <p className="text-sm text-gray-500">
+            Couldn't load trips. Check your connection and try refreshing.
+          </p>
+        </div>
+      ) : isLoading ? (
         <div className="flex flex-col gap-3">
           {[1, 2, 3].map((i) => (
             <div

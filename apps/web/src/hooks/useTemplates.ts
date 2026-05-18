@@ -5,7 +5,11 @@ import type { Template, GearItem, Trip } from '../types';
 export function useTemplates() {
   const qc = useQueryClient();
 
-  const { data: templates = [], isLoading } = useQuery({
+  const {
+    data: templates = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['templates'],
     queryFn: templatesApi.list,
   });
@@ -44,6 +48,7 @@ export function useTemplates() {
   return {
     templates,
     isLoading,
+    isError,
     createTemplate: (
       data: Pick<Template, 'name' | 'description'>,
       items: Omit<GearItem, 'packed'>[]
@@ -51,6 +56,8 @@ export function useTemplates() {
     createTemplateFromTrip: (trip: Trip) => createTemplateFromTrip.mutateAsync(trip),
     updateTemplate: (id: string, patch: Partial<Template>) =>
       updateTemplate.mutateAsync({ id, patch }),
-    deleteTemplate: (id: string) => { deleteTemplate.mutate(id); },
+    deleteTemplate: (id: string) => {
+      deleteTemplate.mutate(id);
+    },
   };
 }

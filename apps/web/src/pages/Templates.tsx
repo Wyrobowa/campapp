@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import type { GeneratedItem } from '../data/templateGenerator';
 
 export function Templates() {
-  const { templates, isLoading, deleteTemplate, createTemplate } = useTemplates();
+  const { templates, isLoading, isError, deleteTemplate, createTemplate } = useTemplates();
   const [showCreator, setShowCreator] = useState(false);
 
   const handleSave = (name: string, items: GeneratedItem[]) => {
@@ -44,7 +44,14 @@ export function Templates() {
         </Button>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <div className="text-center py-12">
+          <p className="text-2xl mb-2">⚠️</p>
+          <p className="text-sm text-gray-500">
+            Couldn't load templates. Check your connection and try refreshing.
+          </p>
+        </div>
+      ) : isLoading ? (
         <div className="flex flex-col gap-3">
           {[1, 2, 3, 4].map((i) => (
             <div
