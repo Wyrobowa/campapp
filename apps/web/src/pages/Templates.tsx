@@ -8,7 +8,7 @@ import type { Template } from '../types';
 import type { GeneratedItem } from '../data/templateGenerator';
 
 export function Templates() {
-  const { templates, isLoading, isError, deleteTemplate, createTemplate, updateTemplate } =
+  const { templates, isLoading, isError, refetch, deleteTemplate, createTemplate, updateTemplate } =
     useTemplates();
   const [showCreator, setShowCreator] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
@@ -66,9 +66,17 @@ export function Templates() {
       {isError ? (
         <div className="text-center py-12">
           <p className="text-2xl mb-2">⚠️</p>
-          <p className="text-sm text-gray-500">
-            Couldn't load templates. Check your connection and try refreshing.
+          <p className="text-sm text-gray-500 mb-3">
+            Couldn't load templates. The server may be waking up.
           </p>
+          <button
+            onClick={() => {
+              void refetch();
+            }}
+            className="text-sm text-forest font-medium hover:underline"
+          >
+            Try again
+          </button>
         </div>
       ) : isLoading ? (
         <div className="flex flex-col gap-3">

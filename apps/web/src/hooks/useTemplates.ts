@@ -9,6 +9,7 @@ export function useTemplates() {
     data: templates = [],
     isLoading,
     isError,
+    refetch,
   } = useQuery({
     queryKey: ['templates'],
     queryFn: templatesApi.list,
@@ -49,6 +50,7 @@ export function useTemplates() {
     templates,
     isLoading,
     isError,
+    refetch,
     createTemplate: (
       data: Pick<Template, 'name' | 'description'>,
       items: Omit<GearItem, 'packed'>[]
