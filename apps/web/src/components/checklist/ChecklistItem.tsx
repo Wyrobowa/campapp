@@ -8,6 +8,10 @@ interface ChecklistItemProps {
   onRemove: (id: string) => void;
 }
 
+function formatWeight(weight: number, unit: 'g' | 'oz' = 'g') {
+  return `${weight}${unit}`;
+}
+
 export function ChecklistItem({ item, onToggle, onRemove }: ChecklistItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -60,14 +64,20 @@ export function ChecklistItem({ item, onToggle, onRemove }: ChecklistItemProps) 
         )}
       </button>
 
-      <span
-        className={`flex-1 text-sm ${item.packed ? 'line-through text-gray-400' : 'text-gray-800'}`}
-      >
-        {item.name}
-        {item.quantity > 1 && (
-          <span className="ml-1.5 text-xs text-gray-400">×{item.quantity}</span>
-        )}
-      </span>
+      <div className="flex-1 min-w-0">
+        <span className={`text-sm ${item.packed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+          {item.name}
+          {item.quantity > 1 && (
+            <span className="ml-1.5 text-xs text-gray-400">×{item.quantity}</span>
+          )}
+          {item.weight != null && (
+            <span className="ml-1.5 text-xs text-gray-400">
+              {formatWeight(item.weight, item.weightUnit)}
+            </span>
+          )}
+        </span>
+        {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
+      </div>
 
       <button
         onClick={() => {

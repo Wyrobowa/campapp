@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import type { GearItem, GearCategory } from '../../types';
-import { CATEGORY_MAP } from '../../data/categories';
+import type { GearItem } from '../../types';
+import { getCategoryDisplay } from '../../data/categories';
 import { ChecklistItem } from './ChecklistItem';
 
 interface CategoryGroupProps {
-  category: GearCategory;
+  category: string;
   items: GearItem[];
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
@@ -13,7 +13,7 @@ interface CategoryGroupProps {
 
 export function CategoryGroup({ category, items, onToggle, onRemove }: CategoryGroupProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const cat = CATEGORY_MAP[category];
+  const cat = getCategoryDisplay(category);
   const packedCount = items.filter((i) => i.packed).length;
 
   return (
