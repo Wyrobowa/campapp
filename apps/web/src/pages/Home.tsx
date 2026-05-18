@@ -11,12 +11,18 @@ export function Home() {
   const { trips, isLoading, createTrip, deleteTrip } = useTrips();
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const handleCreate = async (data: Parameters<typeof createTrip>[0]) => {
-    const template = templates.find((t) => t.id === data.templateId);
-    const trip = await createTrip(data, template ? template.items : []);
-    setShowForm(false);
-    void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
+    setCreateError(null);
+    try {
+      const template = templates.find((t) => t.id === data.templateId);
+      const trip = await createTrip(data, template ? template.items : []);
+      setShowForm(false);
+      void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
+    } catch {
+      setCreateError('Failed to create trip. Please try again.');
+    }
   };
 
   return (
@@ -40,6 +46,7 @@ export function Home() {
       {showForm && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
           <h2 className="font-semibold text-gray-800 mb-4">New trip</h2>
+          {createError && <p className="text-sm text-red-600 mb-3">{createError}</p>}
           <TripForm
             templates={templates}
             onSubmit={(data) => {
@@ -47,6 +54,7 @@ export function Home() {
             }}
             onCancel={() => {
               setShowForm(false);
+              setCreateError(null);
             }}
           />
         </div>

@@ -18,8 +18,17 @@ function TripDetailView({ trip }: { trip: Trip }) {
   const navigate = useNavigate();
   const { toggleItem, addItem, removeItem } = useTrips();
   const { createTemplateFromTrip } = useTemplates();
-  const { editing, editName, editDate, setEditName, setEditDate, startEdit, cancelEdit, saveEdit } =
-    useEditableTrip(trip);
+  const {
+    editing,
+    editName,
+    editDate,
+    editError,
+    setEditName,
+    setEditDate,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+  } = useEditableTrip(trip);
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -44,8 +53,12 @@ function TripDetailView({ trip }: { trip: Trip }) {
   };
 
   const handleSaveAsTemplate = async () => {
-    await createTemplateFromTrip(trip);
-    showToast('Template saved!');
+    try {
+      await createTemplateFromTrip(trip);
+      showToast('Template saved!');
+    } catch {
+      showToast('Failed to save template.');
+    }
   };
 
   return (
@@ -86,6 +99,7 @@ function TripDetailView({ trip }: { trip: Trip }) {
               setEditDate(e.target.value);
             }}
           />
+          {editError && <p className="text-sm text-red-600">{editError}</p>}
           <div className="flex gap-2">
             <Button
               onClick={() => {

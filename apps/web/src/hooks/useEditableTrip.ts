@@ -7,6 +7,7 @@ export function useEditableTrip(trip: Trip) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDate, setEditDate] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
 
   const startEdit = () => {
     setEditName(trip.name);
@@ -16,13 +17,29 @@ export function useEditableTrip(trip: Trip) {
 
   const cancelEdit = () => {
     setEditing(false);
+    setEditError(null);
   };
 
   const saveEdit = async () => {
     if (!editName.trim()) return;
-    await updateTrip(trip.id, { name: editName.trim(), date: editDate });
-    setEditing(false);
+    setEditError(null);
+    try {
+      await updateTrip(trip.id, { name: editName.trim(), date: editDate });
+      setEditing(false);
+    } catch {
+      setEditError('Failed to save changes.');
+    }
   };
 
-  return { editing, editName, editDate, setEditName, setEditDate, startEdit, cancelEdit, saveEdit };
+  return {
+    editing,
+    editName,
+    editDate,
+    editError,
+    setEditName,
+    setEditDate,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+  };
 }
