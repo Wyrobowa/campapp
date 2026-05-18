@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from '@tanstack/react-router';
-import { migrateFromLocalStorage } from '../../db';
-import { useTripsStore } from '../../store/trips';
-import { useTemplatesStore } from '../../store/templates';
-
-async function initApp() {
-  await migrateFromLocalStorage();
-  await Promise.all([useTripsStore.getState().hydrate(), useTemplatesStore.getState().hydrate()]);
-}
+import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { authClient } from '../../lib/auth-client';
+import { Login } from '../../pages/Login';
 
 function NavBar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const tripsActive = pathname === '/' || pathname.startsWith('/trips');
   const templatesActive = pathname.startsWith('/templates');
 
   const active = 'text-forest';
   const inactive = 'text-gray-400';
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    void navigate({ to: '/login' });
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex z-10">
@@ -45,27 +44,40 @@ function NavBar() {
         </svg>
         Templates
       </Link>
+      <button
+        onClick={() => {
+          void handleSignOut();
+        }}
+        className={`flex-1 flex flex-col items-center py-3 text-xs gap-0.5 transition-colors ${inactive}`}
+      >
+        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M13 3h4a1 1 0 011 1v12a1 1 0 01-1 1h-4M9 14l4-4-4-4M3 10h10"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        Sign out
+      </button>
     </nav>
   );
 }
 
 export function RootLayout() {
-  const [ready, setReady] = useState(false);
+  const { data: session, isPending } = authClient.useSession();
 
-  useEffect(() => {
-    const init = async () => {
-      await initApp();
-      setReady(true);
-    };
-    void init();
-  }, []);
-
-  if (!ready) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <p className="text-sm text-gray-400">Loading…</p>
       </div>
     );
+  }
+
+  if (!session) {
+    return <Login />;
   }
 
   return (

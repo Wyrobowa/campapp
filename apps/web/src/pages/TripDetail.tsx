@@ -43,8 +43,8 @@ function TripDetailView({ trip }: { trip: Trip }) {
     }, 2500);
   };
 
-  const handleSaveAsTemplate = () => {
-    createTemplateFromTrip(trip);
+  const handleSaveAsTemplate = async () => {
+    await createTemplateFromTrip(trip);
     showToast('Template saved!');
   };
 
@@ -87,7 +87,12 @@ function TripDetailView({ trip }: { trip: Trip }) {
             }}
           />
           <div className="flex gap-2">
-            <Button onClick={saveEdit} disabled={!editName.trim()}>
+            <Button
+              onClick={() => {
+                void saveEdit();
+              }}
+              disabled={!editName.trim()}
+            >
               Save
             </Button>
             <Button variant="ghost" onClick={cancelEdit}>
@@ -141,10 +146,10 @@ function TripDetailView({ trip }: { trip: Trip }) {
           category={cat.id}
           items={itemsByCategory[cat.id]}
           onToggle={(itemId) => {
-            toggleItem(trip.id, itemId);
+            toggleItem(trip, itemId);
           }}
           onRemove={(itemId) => {
-            removeItem(trip.id, itemId);
+            removeItem(trip, itemId);
           }}
         />
       ))}
@@ -154,7 +159,7 @@ function TripDetailView({ trip }: { trip: Trip }) {
           <div className="mb-4">
             <AddItemForm
               onAdd={(item) => {
-                addItem(trip.id, item);
+                addItem(trip, item);
                 setShowAddForm(false);
               }}
             />
@@ -185,7 +190,9 @@ function TripDetailView({ trip }: { trip: Trip }) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleSaveAsTemplate}
+            onClick={() => {
+              void handleSaveAsTemplate();
+            }}
             className="text-gray-500"
           >
             Save as template
@@ -205,12 +212,12 @@ function TripDetailView({ trip }: { trip: Trip }) {
 export function TripDetail() {
   const { tripId } = Route.useParams();
   const navigate = useNavigate();
-  const { trips } = useTrips();
+  const { trips, isLoading } = useTrips();
 
   const trip = trips.find((t) => t.id === tripId);
 
   useEffect(() => {
-    if (!trip) {
+    if (!isLoading && !trip) {
       const timer = setTimeout(() => {
         void navigate({ to: '/' });
       }, 1500);
@@ -218,7 +225,15 @@ export function TripDetail() {
         clearTimeout(timer);
       };
     }
-  }, [trip, navigate]);
+  }, [trip, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="text-sm text-gray-400">Loading…</p>
+      </div>
+    );
+  }
 
   if (!trip) {
     return (

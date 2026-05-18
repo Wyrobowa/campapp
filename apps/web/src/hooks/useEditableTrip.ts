@@ -18,9 +18,9 @@ export function useEditableTrip(trip: Trip) {
     setEditing(false);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editName.trim()) return;
-    updateTrip(trip.id, { name: editName.trim(), date: editDate });
+    await updateTrip(trip.id, { name: editName.trim(), date: editDate });
     setEditing(false);
   };
 
