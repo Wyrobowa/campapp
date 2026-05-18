@@ -37,12 +37,22 @@ export function Home() {
     }
   };
 
+  const totalItems = trips.reduce((s, t) => s + t.items.length, 0);
+  const packedItems = trips.reduce((s, t) => s + t.items.filter((i) => i.packed).length, 0);
+
   return (
     <div className="p-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-forest">CampApp</h1>
-          <p className="text-sm text-gray-500">Your trips</p>
+          {trips.length > 0 ? (
+            <p className="text-xs text-gray-400 mt-0.5">
+              {trips.length} {trips.length === 1 ? 'trip' : 'trips'} · {totalItems} items
+              {packedItems > 0 && ` · ${packedItems} packed`}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">Your trips</p>
+          )}
         </div>
         {!showForm && (
           <Button
