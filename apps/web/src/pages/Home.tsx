@@ -12,6 +12,12 @@ export function Home() {
   const { templates } = useTemplates();
   const [showForm, setShowForm] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'upcoming' | 'past'>('upcoming');
+
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = trips.filter((t) => t.date >= today);
+  const past = trips.filter((t) => t.date < today);
+  const visibleTrips = filter === 'upcoming' ? upcoming : past;
 
   const handleCreate = async (data: Parameters<typeof createTrip>[0]) => {
     setCreateError(null);
@@ -82,20 +88,56 @@ export function Home() {
           <p className="text-gray-500 text-sm">No trips yet — create your first one!</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {trips.map((trip) => (
-            <TripCard
-              key={trip.id}
-              trip={trip}
+        <>
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-4">
+            <button
               onClick={() => {
-                void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
+                setFilter('upcoming');
               }}
-              onDelete={() => {
-                deleteTrip(trip.id);
+              className={`flex-1 text-sm font-medium py-1.5 rounded-lg transition-colors ${
+                filter === 'upcoming'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Upcoming{upcoming.length > 0 ? ` (${upcoming.length})` : ''}
+            </button>
+            <button
+              onClick={() => {
+                setFilter('past');
               }}
-            />
-          ))}
-        </div>
+              className={`flex-1 text-sm font-medium py-1.5 rounded-lg transition-colors ${
+                filter === 'past'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Past{past.length > 0 ? ` (${past.length})` : ''}
+            </button>
+          </div>
+          {visibleTrips.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-sm">
+                {filter === 'upcoming' ? 'No upcoming trips.' : 'No past trips.'}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {visibleTrips.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  trip={trip}
+                  onClick={() => {
+                    void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
+                  }}
+                  onDelete={() => {
+                    deleteTrip(trip.id);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
