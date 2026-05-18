@@ -7,3 +7,4 @@ export const LazyTripDetail = lazy(() =>
 export const LazyTemplates = lazy(() =>
   import('./Templates').then((m) => ({ default: m.Templates }))
 );
+export const LazyAccount = lazy(() => import('./Account').then((m) => ({ default: m.Account })));

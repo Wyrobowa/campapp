@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
 import { RootLayout } from './components/layout/RootLayout';
 import { PageSuspense } from './components/ui/PageSuspense';
-import { LazyHome, LazyTripDetail, LazyTemplates } from './pages/lazy';
+import { LazyHome, LazyTripDetail, LazyTemplates, LazyAccount } from './pages/lazy';
 
 const rootRoute = createRootRoute({ component: RootLayout });
 
@@ -35,7 +35,17 @@ const templatesRoute = createRoute({
   ),
 });
 
-const routeTree = rootRoute.addChildren([homeRoute, tripRoute, templatesRoute]);
+const accountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/account',
+  component: () => (
+    <PageSuspense>
+      <LazyAccount />
+    </PageSuspense>
+  ),
+});
+
+const routeTree = rootRoute.addChildren([homeRoute, tripRoute, templatesRoute, accountRoute]);
 
 export const router = createRouter({ routeTree });
 

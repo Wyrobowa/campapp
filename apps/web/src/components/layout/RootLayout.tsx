@@ -6,13 +6,10 @@ function NavBar() {
   const { pathname } = useLocation();
   const tripsActive = pathname === '/' || pathname.startsWith('/trips');
   const templatesActive = pathname.startsWith('/templates');
+  const accountActive = pathname.startsWith('/account');
 
   const active = 'text-forest';
   const inactive = 'text-gray-400';
-
-  const handleSignOut = async () => {
-    await authClient.signOut();
-  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex z-10">
@@ -42,23 +39,21 @@ function NavBar() {
         </svg>
         Templates
       </Link>
-      <button
-        onClick={() => {
-          void handleSignOut();
-        }}
-        className={`flex-1 flex flex-col items-center py-3 text-xs gap-0.5 transition-colors ${inactive}`}
+      <Link
+        to="/account"
+        className={`flex-1 flex flex-col items-center py-3 text-xs gap-0.5 transition-colors ${accountActive ? active : inactive}`}
       >
         <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
           <path
-            d="M13 3h4a1 1 0 011 1v12a1 1 0 01-1 1h-4M9 14l4-4-4-4M3 10h10"
+            d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
-            strokeLinejoin="round"
           />
         </svg>
-        Sign out
-      </button>
+        Account
+      </Link>
     </nav>
   );
 }
