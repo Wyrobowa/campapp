@@ -7,6 +7,8 @@ import { tripsRouter } from './routes/trips.js';
 import { templatesRouter } from './routes/templates.js';
 import { accountRouter } from './routes/account.js';
 import { shareRouter } from './routes/share.js';
+import { pushRouter } from './routes/push.js';
+import { startTripReminderJob } from './jobs/tripReminders.js';
 import type { AppVariables } from './types.js';
 
 const app = new Hono<{ Variables: AppVariables }>();
@@ -27,8 +29,10 @@ app.route('/api/trips', tripsRouter);
 app.route('/api/templates', templatesRouter);
 app.route('/api/account', accountRouter);
 app.route('/api/share', shareRouter);
+app.route('/api/push', pushRouter);
 
 const port = Number(process.env.PORT ?? 3000);
 serve({ fetch: app.fetch, port }, () => {
   console.log(`API running on http://localhost:${port}`);
+  startTripReminderJob();
 });
