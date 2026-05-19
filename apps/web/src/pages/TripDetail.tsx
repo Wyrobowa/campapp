@@ -399,8 +399,12 @@ function TripDetailView({ trip }: { trip: Trip }) {
             <CollaboratorsPanel
               tripId={trip.id}
               collaborators={trip.collaborators}
-              onInvite={(email) => inviteCollaborator(trip.id, email)}
-              onRemove={(collaboratorId) => removeCollaborator(trip.id, collaboratorId)}
+              onInvite={async (email) => {
+                await inviteCollaborator(trip.id, email);
+              }}
+              onRemove={async (collaboratorId) => {
+                await removeCollaborator(trip.id, collaboratorId);
+              }}
             />
           </div>
         )}

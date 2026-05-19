@@ -48,9 +48,9 @@ export function ShareTrip() {
       acc[cat.id] = trip.items.filter((i) => i.category === cat.id);
       return acc;
     },
-    {} as Record<GearCategory, typeof trip.items>
+    {}
   );
-  const categoriesWithItems = CATEGORIES.filter((c) => itemsByCategory[c.id].length > 0);
+  const categoriesWithItems = CATEGORIES.filter((c) => (itemsByCategory[c.id]?.length ?? 0) > 0);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -81,7 +81,7 @@ export function ShareTrip() {
               <span>{cat.label}</span>
             </p>
             <ul className="divide-y divide-gray-100 pl-1">
-              {itemsByCategory[cat.id].map((item) => (
+              {(itemsByCategory[cat.id] ?? []).map((item) => (
                 <li key={item.id} className="flex items-center gap-3 py-2.5 px-1">
                   <div
                     className={`w-6 h-6 rounded-md border-2 flex-shrink-0 flex items-center justify-center ${
