@@ -9,6 +9,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
         name: 'CampApp',
@@ -22,21 +25,8 @@ export default defineConfig({
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        navigateFallback: 'index.html',
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\/(trips|templates)(\/|$)/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'campapp-api',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [200] },
-            },
-          },
-        ],
       },
     }),
   ],
