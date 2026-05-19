@@ -41,16 +41,26 @@ export const TemplateSchema = z.object({
   updatedAt: z.string(),
 });
 
+// ── COLLABORATOR ──────────────────────────────────────────────────
+
+export const CollaboratorSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+});
+
 // ── TRIP ──────────────────────────────────────────────────────────
 
 export const TripSchema = z.object({
   id: z.string(),
+  userId: z.string(),
   name: z.string(),
   date: z.string(),
   templateId: z.string().nullable().optional(),
   items: z.array(GearItemSchema),
   notes: z.string().nullable().optional(),
   shareToken: z.string().nullable().optional(),
+  collaborators: z.array(CollaboratorSchema).default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -66,4 +76,5 @@ export type GearCategory = z.infer<typeof GearCategorySchema>;
 export type GearItem = z.infer<typeof GearItemSchema>;
 export type TemplateItem = z.infer<typeof TemplateItemSchema>;
 export type Template = z.infer<typeof TemplateSchema>;
+export type Collaborator = z.infer<typeof CollaboratorSchema>;
 export type Trip = z.infer<typeof TripSchema>;
