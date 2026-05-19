@@ -10,9 +10,11 @@ vi.mock('../lib/api');
 
 const trip: Trip = {
   id: 'trip-1',
+  userId: 'user-1',
   name: 'Alpine weekend',
   date: '2025-08-01',
   items: [],
+  collaborators: [],
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };

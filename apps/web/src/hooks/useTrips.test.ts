@@ -10,9 +10,11 @@ vi.mock('../lib/api');
 
 const makeTrip = (overrides: Partial<Trip> = {}): Trip => ({
   id: 'trip-1',
+  userId: 'user-1',
   name: 'Test trip',
   date: '2025-08-01',
   items: [],
+  collaborators: [],
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
   ...overrides,
@@ -40,7 +42,9 @@ describe('useTrips', () => {
     const trips = [makeTrip()];
     vi.mocked(api.tripsApi.list).mockResolvedValue(trips);
     const { result } = renderHook(() => useTrips(), { wrapper: wrapper() });
-    await waitFor(() => { expect(result.current.isLoading).toBe(false); });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
     expect(result.current.trips).toEqual(trips);
   });
 
@@ -58,13 +62,17 @@ describe('useTrips', () => {
       vi.mocked(api.tripsApi.update).mockReturnValue(new Promise(() => undefined));
 
       const { result } = renderHook(() => useTrips(), { wrapper: wrapper() });
-      await waitFor(() => { expect(result.current.trips).toHaveLength(1); });
+      await waitFor(() => {
+        expect(result.current.trips).toHaveLength(1);
+      });
 
       act(() => {
         result.current.toggleItem(trip, 'i-1');
       });
 
-      await waitFor(() => { expect(result.current.trips[0]?.items[0]?.packed).toBe(true); });
+      await waitFor(() => {
+        expect(result.current.trips[0]?.items[0]?.packed).toBe(true);
+      });
     });
 
     it('rolls back on API error', async () => {
@@ -80,12 +88,16 @@ describe('useTrips', () => {
       vi.mocked(api.tripsApi.update).mockRejectedValue(new Error('Network error'));
 
       const { result } = renderHook(() => useTrips(), { wrapper: wrapper() });
-      await waitFor(() => { expect(result.current.trips).toHaveLength(1); });
+      await waitFor(() => {
+        expect(result.current.trips).toHaveLength(1);
+      });
 
       act(() => {
         result.current.toggleItem(trip, 'i-1');
       });
-      await waitFor(() => { expect(result.current.trips[0]?.items[0]?.packed).toBe(false); });
+      await waitFor(() => {
+        expect(result.current.trips[0]?.items[0]?.packed).toBe(false);
+      });
     });
   });
 
@@ -96,7 +108,9 @@ describe('useTrips', () => {
       vi.mocked(api.tripsApi.update).mockReturnValue(new Promise(() => undefined));
 
       const { result } = renderHook(() => useTrips(), { wrapper: wrapper() });
-      await waitFor(() => { expect(result.current.trips).toHaveLength(1); });
+      await waitFor(() => {
+        expect(result.current.trips).toHaveLength(1);
+      });
 
       act(() => {
         result.current.addItem(trip, {
@@ -107,7 +121,9 @@ describe('useTrips', () => {
         });
       });
 
-      await waitFor(() => { expect(result.current.trips[0]?.items).toHaveLength(1); });
+      await waitFor(() => {
+        expect(result.current.trips[0]?.items).toHaveLength(1);
+      });
       expect(result.current.trips[0]?.items[0]?.name).toBe('Tent');
     });
   });
@@ -126,13 +142,17 @@ describe('useTrips', () => {
       vi.mocked(api.tripsApi.update).mockReturnValue(new Promise(() => undefined));
 
       const { result } = renderHook(() => useTrips(), { wrapper: wrapper() });
-      await waitFor(() => { expect(result.current.trips).toHaveLength(1); });
+      await waitFor(() => {
+        expect(result.current.trips).toHaveLength(1);
+      });
 
       act(() => {
         result.current.removeItem(trip, 'i-1');
       });
 
-      await waitFor(() => { expect(result.current.trips[0]?.items).toHaveLength(0); });
+      await waitFor(() => {
+        expect(result.current.trips[0]?.items).toHaveLength(0);
+      });
     });
   });
 });
