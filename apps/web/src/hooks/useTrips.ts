@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { tripsApi, shareApi } from '../lib/api';
+import { tripsApi, shareApi, collaboratorsApi } from '../lib/api';
 import type { Trip, GearItem } from '../types';
 import { generateId } from '../utils/id';
 
@@ -144,6 +144,18 @@ export function useTrips() {
     onSuccess: invalidate,
   });
 
+  const inviteCollaborator = useMutation({
+    mutationFn: (vars: { tripId: string; email: string }) =>
+      collaboratorsApi.invite(vars.tripId, vars.email),
+    onSuccess: invalidate,
+  });
+
+  const removeCollaborator = useMutation({
+    mutationFn: (vars: { tripId: string; collaboratorId: string }) =>
+      collaboratorsApi.remove(vars.tripId, vars.collaboratorId),
+    onSuccess: invalidate,
+  });
+
   const setAllPacked = useMutation({
     mutationFn: (vars: { trip: Trip; packed: boolean }) => {
       const items = vars.trip.items.map((item) => ({ ...item, packed: vars.packed }));
@@ -192,5 +204,9 @@ export function useTrips() {
     },
     shareTrip: (tripId: string) => shareTrip.mutateAsync(tripId),
     unshareTrip: (tripId: string) => unshareTrip.mutateAsync(tripId),
+    inviteCollaborator: (tripId: string, email: string) =>
+      inviteCollaborator.mutateAsync({ tripId, email }),
+    removeCollaborator: (tripId: string, collaboratorId: string) =>
+      removeCollaborator.mutateAsync({ tripId, collaboratorId }),
   };
 }

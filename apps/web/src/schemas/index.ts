@@ -8,4 +8,11 @@ export {
   TemplateArraySchema,
 } from '@campapp/shared';
 
-export type { GearCategory, GearItem, TemplateItem, Template, Trip } from '@campapp/shared';
+export type {
+  GearCategory,
+  GearItem,
+  TemplateItem,
+  Template,
+  Trip,
+  Collaborator,
+} from '@campapp/shared';

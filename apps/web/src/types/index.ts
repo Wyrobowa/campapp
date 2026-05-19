@@ -1,1 +1,8 @@
-export type { GearCategory, GearItem, TemplateItem, Template, Trip } from '../schemas';
+export type {
+  GearCategory,
+  GearItem,
+  TemplateItem,
+  Template,
+  Trip,
+  Collaborator,
+} from '../schemas';

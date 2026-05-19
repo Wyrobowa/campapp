@@ -62,6 +62,22 @@ export const shareApi = {
   get: (token: string) => request<SharedTrip>(`/api/share/${token}`),
 };
 
+// ── COLLABORATORS ─────────────────────────────────────────────────
+
+export interface CollaboratorInfo { id: string; name: string; email: string }
+
+export const collaboratorsApi = {
+  invite: (tripId: string, email: string) =>
+    request<CollaboratorInfo>(`/api/trips/${tripId}/collaborators`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+  remove: (tripId: string, collaboratorId: string) =>
+    request<{ ok: boolean }>(`/api/trips/${tripId}/collaborators/${collaboratorId}`, {
+      method: 'DELETE',
+    }),
+};
+
 // ── ACCOUNT ───────────────────────────────────────────────────────
 
 export const accountApi = {
