@@ -14,9 +14,11 @@ import type { Trip } from '../types';
 import { useTrips } from '../hooks/useTrips';
 import { useTemplates } from '../hooks/useTemplates';
 import { useEditableTrip } from '../hooks/useEditableTrip';
+import { authClient } from '../lib/auth-client';
 import { CATEGORIES, getCategoryDisplay } from '../data/categories';
 import { CategoryGroup } from '../components/checklist/CategoryGroup';
 import { AddItemForm } from '../components/checklist/AddItemForm';
+import { CollaboratorsPanel } from '../components/trips/CollaboratorsPanel';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -26,8 +28,19 @@ const Route = getRouteApi('/trips/$tripId');
 
 function TripDetailView({ trip }: { trip: Trip }) {
   const navigate = useNavigate();
-  const { toggleItem, addItem, removeItem, setAllPacked, reorderItems, shareTrip, unshareTrip } =
-    useTrips();
+  const {
+    toggleItem,
+    addItem,
+    removeItem,
+    setAllPacked,
+    reorderItems,
+    shareTrip,
+    unshareTrip,
+    inviteCollaborator,
+    removeCollaborator,
+  } = useTrips();
+  const { data: session } = authClient.useSession();
+  const isOwner = session?.user.id === trip.userId;
   const { createTemplateFromTrip } = useTemplates();
   const {
     editing,
@@ -378,6 +391,19 @@ function TripDetailView({ trip }: { trip: Trip }) {
             </button>
           )}
         </div>
+        {isOwner && (
+          <div className="pt-3 border-t border-gray-100">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              Collaborators
+            </p>
+            <CollaboratorsPanel
+              tripId={trip.id}
+              collaborators={trip.collaborators}
+              onInvite={(email) => inviteCollaborator(trip.id, email)}
+              onRemove={(collaboratorId) => removeCollaborator(trip.id, collaboratorId)}
+            />
+          </div>
+        )}
       </div>
 
       {toast && (

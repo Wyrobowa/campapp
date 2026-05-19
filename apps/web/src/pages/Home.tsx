@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTrips } from '../hooks/useTrips';
 import { useTemplates } from '../hooks/useTemplates';
+import { authClient } from '../lib/auth-client';
 import { TripCard } from '../components/trips/TripCard';
 import { TripForm } from '../components/trips/TripForm';
 import { Button } from '../components/ui/Button';
@@ -10,6 +11,8 @@ export function Home() {
   const navigate = useNavigate();
   const { trips, isLoading, isError, refetch, createTrip, deleteTrip, duplicateTrip } = useTrips();
   const { templates } = useTemplates();
+  const { data: session } = authClient.useSession();
+  const currentUserId = session?.user.id;
   const [showForm, setShowForm] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'upcoming' | 'past'>('upcoming');
@@ -181,6 +184,7 @@ export function Home() {
                 <TripCard
                   key={trip.id}
                   trip={trip}
+                  isOwner={!currentUserId || trip.userId === currentUserId}
                   onClick={() => {
                     void navigate({ to: '/trips/$tripId', params: { tripId: trip.id } });
                   }}
