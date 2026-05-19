@@ -63,6 +63,14 @@ export const trips = pgTable('trips', {
   updatedAt:  timestamp('updated_at', { withTimezone: true }).notNull(),
 });
 
+export const tripCollaborators = pgTable('trip_collaborators', {
+  id:          text('id').primaryKey(),
+  tripId:      text('trip_id').notNull().references(() => trips.id, { onDelete: 'cascade' }),
+  userId:      text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  invitedBy:   text('invited_by').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  createdAt:   timestamp('created_at', { withTimezone: true }).notNull(),
+});
+
 export const templates = pgTable('templates', {
   id:          text('id').primaryKey(),
   userId:      text('user_id').references(() => user.id, { onDelete: 'cascade' }),
