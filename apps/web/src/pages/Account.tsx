@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
 import { accountApi } from '../lib/api';
 import { Input } from '../components/ui/Input';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 export function Account() {
   const navigate = useNavigate();
@@ -62,6 +63,8 @@ export function Account() {
     await authClient.signOut();
     void navigate({ to: '/' });
   };
+
+  const push = usePushNotifications();
 
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -161,6 +164,38 @@ export function Account() {
           {changingPw ? 'Saving…' : 'Change password'}
         </button>
       </form>
+
+      {push.supported && (
+        <div className="mb-8">
+          <h2 className="text-base font-semibold mb-1">Notifications</h2>
+          <p className="text-sm text-gray-500 mb-3">Get a reminder the day before each trip.</p>
+          {push.permission === 'denied' ? (
+            <p className="text-sm text-gray-400">
+              Notifications are blocked. Enable them in your browser settings.
+            </p>
+          ) : push.subscribed ? (
+            <button
+              onClick={() => {
+                void push.unsubscribe();
+              }}
+              disabled={push.loading}
+              className="btn-secondary text-sm"
+            >
+              {push.loading ? 'Turning off…' : 'Turn off notifications'}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                void push.subscribe();
+              }}
+              disabled={push.loading}
+              className="btn-primary text-sm"
+            >
+              {push.loading ? 'Enabling…' : 'Enable notifications'}
+            </button>
+          )}
+        </div>
+      )}
 
       <button
         onClick={() => {

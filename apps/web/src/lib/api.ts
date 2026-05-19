@@ -64,7 +64,11 @@ export const shareApi = {
 
 // ── COLLABORATORS ─────────────────────────────────────────────────
 
-export interface CollaboratorInfo { id: string; name: string; email: string }
+export interface CollaboratorInfo {
+  id: string;
+  name: string;
+  email: string;
+}
 
 export const collaboratorsApi = {
   invite: (tripId: string, email: string) =>
@@ -75,6 +79,21 @@ export const collaboratorsApi = {
   remove: (tripId: string, collaboratorId: string) =>
     request<{ ok: boolean }>(`/api/trips/${tripId}/collaborators/${collaboratorId}`, {
       method: 'DELETE',
+    }),
+};
+
+// ── PUSH ──────────────────────────────────────────────────────────
+
+export const pushApi = {
+  subscribe: (sub: PushSubscriptionJSON) =>
+    request<{ ok: boolean }>('/api/push/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({ endpoint: sub.endpoint, keys: sub.keys }),
+    }),
+  unsubscribe: (endpoint: string) =>
+    request<{ ok: boolean }>('/api/push/subscribe', {
+      method: 'DELETE',
+      body: JSON.stringify({ endpoint }),
     }),
 };
 
