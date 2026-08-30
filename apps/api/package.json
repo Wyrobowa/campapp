@@ -21,7 +21,7 @@
     "better-auth": "^1.2.7",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.25",
+    "hono": "^4.12.34",
     "node-cron": "^4.2.1",
     "pg": "^8.13.3",
     "web-push": "^3.6.7",
@@ -34,7 +34,7 @@
     "@types/web-push": "^3.6.4",
     "@vitest/coverage-v8": "^4.1.6",
     "drizzle-kit": "^0.31.1",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "tsx": "^4.19.4",
     "typescript": "~6.0.2",
     "vitest": "^4.1.6"
